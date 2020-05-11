@@ -46,9 +46,26 @@ object ManifestPermission {
         }
     }
 
-    fun requestPermission(activity : Activity, permission : String, requestCode : Int) {
+    fun checkSelfPermission(context : Context, permissions : Array<String>, isGranted : () -> Unit = {}, isDenied : () -> Unit = {}) {
+        Log.d(TAG,"checkSelfPermission($context,${permissions.contentToString()},isGranted(),isDenied())")
+        if (permissions.filter { permission -> ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_DENIED}.isEmpty()) {
+            Log.d(TAG,"allGranted()")
+            isGranted()
+        }
+        else {
+            Log.d(TAG,"denied()")
+            isDenied()
+        }
+    }
+
+    fun requestPermissions(activity : Activity, permission : String, requestCode : Int) {
         Log.d(TAG,"requestPermissions($activity,$permission,$requestCode")
         ActivityCompat.requestPermissions(activity, arrayOf(permission),requestCode)
+    }
+
+    fun requestPermissions(activity : Activity, permissions : Array<String>, requestCode : Int) {
+        Log.d(TAG,"requestPermissions($activity,${permissions.contentToString()},$requestCode")
+        ActivityCompat.requestPermissions(activity, permissions,requestCode)
     }
 
     fun checkPermissionsResult(activity : Activity, permissions : Array<String>, grantResults : IntArray,isGranted : () -> Unit, isNeverAskAgain : () -> Unit = {}, isDenied : () -> Unit) {

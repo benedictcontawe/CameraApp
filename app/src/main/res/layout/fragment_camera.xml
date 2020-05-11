@@ -2,11 +2,9 @@
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:background="@android:color/darker_gray"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
-
+    android:layout_height="match_parent" >
     <!--region Guide lines-->
     <!--region Vertical Guide lines-->
     <androidx.constraintlayout.widget.Guideline
@@ -35,7 +33,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        app:layout_constraintGuide_percent="0.75"/>
+        app:layout_constraintGuide_percent="0.85"/>
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/constraint_guideline_vertical_trailing"
@@ -76,27 +74,28 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent" />
 
-    <ImageButton
+    <ImageView
         android:id="@+id/camera_capture_button"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:background="@drawable/ic_shutter"
         android:scaleType="fitXY"
+        app:srcCompat="@drawable/ic_shutter"
         app:layout_constraintDimensionRatio="1:1"
         app:layout_constraintStart_toStartOf="@id/constraint_guideline_vertical_shutter_leading"
         app:layout_constraintEnd_toEndOf="@id/constraint_guideline_vertical_shutter_trailing"
         app:layout_constraintBottom_toBottomOf="@id/constraint_guideline_horizontal_shutter_bottom" />
 
-    <ImageButton
+    <ImageView
         android:id="@+id/camera_change_button"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:background="@drawable/ic_change"
+        android:background="@drawable/ic_change_aura"
         android:scaleType="fitXY"
+        app:srcCompat="@drawable/ic_change"
         app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintTop_toTopOf="@id/camera_capture_button"
         app:layout_constraintStart_toStartOf="@id/constraint_guideline_vertical_change_leading"
         app:layout_constraintEnd_toEndOf="@id/constraint_guideline_vertical_trailing"
-        app:layout_constraintBottom_toBottomOf="@id/constraint_guideline_horizontal_bottom"
-        />
+        app:layout_constraintBottom_toBottomOf="@id/camera_capture_button" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
