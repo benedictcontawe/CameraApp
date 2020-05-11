@@ -33,20 +33,38 @@
     <path
         android:strokeWidth="1"
         android:strokeColor="#AAA"
-        android:pathData="M0,50 100,50" />
+        android:pathData="M29,29 71,71" />
 
     <path
         android:strokeWidth="1"
+        android:strokeColor="#FFF"
+        android:pathData="M29,29 71,71 0,71 z" />
+
+    <path
+        android:strokeWidth="1"
+        android:strokeColor="#AAA"
+        android:pathData="M0,50 100,50" />
+
+    <path
+        android:strokeWidth="2"
         android:strokeColor="#FF0007"
         android:trimPathStart="0"
         android:trimPathEnd="0.75"
         android:pathData="M 29 29 A 20 20 0 0 1 71 71" />
 
     <path
-        android:strokeWidth="1"
+        android:fillColor="#FF0007"
+        android:pathData="M69,50 79,50 89,50 79,62 Z" />
+
+    <path
+        android:strokeWidth="2"
         android:strokeColor="#7000FF"
         android:trimPathStart="0.25"
         android:trimPathEnd="0"
         android:pathData="M 29 29 A 20 20 0 0 0 71 71" />
+
+    <path
+        android:fillColor="#7000FF"
+        android:pathData="M11,50 21,50 31,50 21,38 Z" />
 
 </vector>
