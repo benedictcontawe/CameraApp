@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:background="@android:color/darker_gray"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!--region Guide lines-->
+    <!--region Vertical Guide lines-->
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/constraint_guideline_vertical_leading"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.05"/>
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/constraint_guideline_vertical_shutter_leading"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.40"/>
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/constraint_guideline_vertical_shutter_trailing"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.60"/>
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/constraint_guideline_vertical_change_leading"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.75"/>
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/constraint_guideline_vertical_trailing"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.95"/>
+    <!--endregion-->
+    <!--region Horizontal Guidlines-->
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/constraint_guideline_horizontal_top"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.05" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/constraint_guideline_horizontal_shutter_bottom"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.95" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/constraint_guideline_horizontal_bottom"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.95" />
+    <!--endregion-->
+    <!--endregion-->
+    <androidx.camera.view.PreviewView
+        android:id="@+id/preview_view"
+        android:layout_width="0px"
+        android:layout_height="0px"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+    <ImageButton
+        android:id="@+id/camera_capture_button"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@drawable/ic_shutter"
+        android:scaleType="fitXY"
+        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintStart_toStartOf="@id/constraint_guideline_vertical_shutter_leading"
+        app:layout_constraintEnd_toEndOf="@id/constraint_guideline_vertical_shutter_trailing"
+        app:layout_constraintBottom_toBottomOf="@id/constraint_guideline_horizontal_shutter_bottom" />
+
+    <ImageButton
+        android:id="@+id/camera_change_button"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@drawable/ic_change"
+        android:scaleType="fitXY"
+        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintStart_toStartOf="@id/constraint_guideline_vertical_change_leading"
+        app:layout_constraintEnd_toEndOf="@id/constraint_guideline_vertical_trailing"
+        app:layout_constraintBottom_toBottomOf="@id/constraint_guideline_horizontal_bottom"
+        />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

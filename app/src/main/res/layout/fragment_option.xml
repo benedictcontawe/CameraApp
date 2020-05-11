@@ -1,0 +1,59 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@android:color/white"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/textViwq_bottom_sheet_heading"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Camera X"
+        android:textAppearance="@style/TextAppearance.AppCompat.Large" />
+
+    <TextView
+        android:id="@+id/tv_btn_take_photo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Take Photo"
+        android:textColor="#00245F"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
+
+    <TextView
+        android:id="@+id/tv_btn_choose_photo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Choose Photo"
+        android:textColor="#00245F"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
+
+    <TextView
+        android:id="@+id/tv_btn_edit_photo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Edit Photo"
+        android:textColor="#00245F"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
+
+    <TextView
+        android:id="@+id/tv_btn_delete_photo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Delete Photo"
+        android:textColor="#00245F"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@android:color/darker_gray" />
+
+    <TextView
+        android:id="@+id/tv_btn_cancel_photo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Cancel"
+        android:textColor="@android:color/darker_gray"
+        android:textAppearance="@style/TextAppearance.AppCompat.Small" />
+
+</LinearLayout>
