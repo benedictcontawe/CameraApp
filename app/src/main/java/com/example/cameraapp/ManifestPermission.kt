@@ -23,16 +23,10 @@ object ManifestPermission {
 
     val cameraPermission = Manifest.permission.CAMERA
 
-    val galleryPermissions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-        arrayOf(
+    val galleryPermissions = arrayOf(
             Manifest.permission.READ_EXTERNAL_STORAGE,
             Manifest.permission.WRITE_EXTERNAL_STORAGE
         )
-    } else {
-        arrayOf(
-            Manifest.permission.WRITE_EXTERNAL_STORAGE
-        )
-    }
 
     fun checkSelfPermission(context : Context, permission : String, isGranted : () -> Unit = {}, isDenied : () -> Unit = {}) {
         Log.d(TAG,"checkSelfPermission($context,$permission,isGranted(),isDenied())")

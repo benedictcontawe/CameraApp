@@ -2,13 +2,8 @@ package com.example.cameraapp
 
 import android.os.Bundle
 import android.os.Environment
-import android.view.TextureView
 import android.view.View
-import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.CameraSelector
-import androidx.camera.core.CameraX
-import androidx.camera.core.ImageCapture
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
@@ -17,34 +12,24 @@ import kotlinx.android.synthetic.main.activity_main.*
 import java.io.File
 //import androidx.camera.core.PreviewConfig
 
-class MainActivity : AppCompatActivity(), View.OnClickListener {
+class MainActivity : BaseActivity(), View.OnClickListener {
 
-    private lateinit var viewModel : MediaBottomSheetViewModel
+    private lateinit var viewModel : OptionBottomSheetViewModel
 
     override fun onCreate(savedInstanceState : Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         initiateCameraX()
         image_view.setOnClickListener(this)
-        viewModel = ViewModelProvider(this).get(MediaBottomSheetViewModel::class.java)
-    }
-
-    override fun onResume() {
-        super.onResume()
-        ManifestPermission.checkSelfPermission(this@MainActivity, ManifestPermission.cameraPermission,
-            isGranted = {
-                Toast.makeText(this@MainActivity,"Camera Permission Granted!",Toast.LENGTH_LONG).show()
-            },
-            isDenied = {
-                ManifestPermission.requestPermissions(this@MainActivity, ManifestPermission.cameraPermission, ManifestPermission.CAMERA_PERMISSION_CODE)
-            }
-        )
+        viewModel = ViewModelProvider(this).get(OptionBottomSheetViewModel::class.java)
     }
 
     override fun onClick(view : View) {
         when(view) {
             image_view -> {
-
+                showBottomSheetFragment(
+                    OptionBottomSheetDialogFragment.newInstance()
+                )
             }
         }
     }
@@ -79,22 +64,4 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         return File(filePath,fileName)
     }
     //endregion
-    override fun onRequestPermissionsResult(requestCode : Int, permissions : Array<String>, grantResults : IntArray) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        when(requestCode) {
-            ManifestPermission.CAMERA_PERMISSION_CODE -> {
-                ManifestPermission.checkPermissionsResult(this@MainActivity, permissions, grantResults,
-                    isGranted = {
-                        Toast.makeText(this@MainActivity,"Camera Permission Granted!",Toast.LENGTH_LONG).show()
-                    },
-                    isDenied = {
-                        ManifestPermission.requestPermissions(this@MainActivity, ManifestPermission.cameraPermission, ManifestPermission.CAMERA_PERMISSION_CODE)
-                    },
-                    isNeverAskAgain = {
-                        ManifestPermission.showRationalDialog(this@MainActivity,"Go to App Permission Settings?")
-                    }
-                )
-            }
-        }
-    }
 }

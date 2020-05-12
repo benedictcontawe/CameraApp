@@ -1,59 +1,98 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="@android:color/white"
     android:orientation="vertical">
-
-    <TextView
-        android:id="@+id/textViwq_bottom_sheet_heading"
+    <!--region Guide lines-->
+    <!--region Vertical Guide lines-->
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/constraint_guideline_vertical_leading"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.05"/>
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/constraint_guideline_vertical_trailing"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.95"/>
+    <!--endregion-->
+    <!--endregion-->
+    <TextView
+        android:id="@+id/tv_bottom_sheet_heading"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
         android:text="Camera X"
-        android:textAppearance="@style/TextAppearance.AppCompat.Large" />
+        android:textAppearance="@style/TextAppearance.AppCompat.Large"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="@id/constraint_guideline_vertical_leading"
+        app:layout_constraintEnd_toEndOf="@id/constraint_guideline_vertical_trailing" />
 
     <TextView
         android:id="@+id/tv_btn_take_photo"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="Take Photo"
         android:textColor="#00245F"
-        android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        app:layout_constraintTop_toBottomOf="@id/tv_bottom_sheet_heading"
+        app:layout_constraintStart_toStartOf="@id/constraint_guideline_vertical_leading"
+        app:layout_constraintEnd_toEndOf="@id/constraint_guideline_vertical_trailing" />
 
     <TextView
         android:id="@+id/tv_btn_choose_photo"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="Choose Photo"
         android:textColor="#00245F"
-        android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        app:layout_constraintTop_toBottomOf="@id/tv_btn_take_photo"
+        app:layout_constraintStart_toStartOf="@id/constraint_guideline_vertical_leading"
+        app:layout_constraintEnd_toEndOf="@id/constraint_guideline_vertical_trailing" />
 
     <TextView
         android:id="@+id/tv_btn_edit_photo"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="Edit Photo"
         android:textColor="#00245F"
-        android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        app:layout_constraintTop_toBottomOf="@id/tv_btn_choose_photo"
+        app:layout_constraintStart_toStartOf="@id/constraint_guideline_vertical_leading"
+        app:layout_constraintEnd_toEndOf="@id/constraint_guideline_vertical_trailing" />
 
     <TextView
         android:id="@+id/tv_btn_delete_photo"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="Delete Photo"
         android:textColor="#00245F"
-        android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        app:layout_constraintTop_toBottomOf="@id/tv_btn_edit_photo"
+        app:layout_constraintStart_toStartOf="@id/constraint_guideline_vertical_leading"
+        app:layout_constraintEnd_toEndOf="@id/constraint_guideline_vertical_trailing" />
 
     <View
-        android:layout_width="match_parent"
+        android:id="@+id/view_divider"
+        android:layout_width="0dp"
         android:layout_height="1dp"
-        android:background="@android:color/darker_gray" />
+        android:background="@android:color/darker_gray"
+        app:layout_constraintTop_toBottomOf="@id/tv_btn_delete_photo"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <TextView
         android:id="@+id/tv_btn_cancel_photo"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="Cancel"
         android:textColor="@android:color/darker_gray"
-        android:textAppearance="@style/TextAppearance.AppCompat.Small" />
+        android:textAppearance="@style/TextAppearance.AppCompat.Small"
+        app:layout_constraintTop_toBottomOf="@id/view_divider"
+        app:layout_constraintStart_toStartOf="@id/constraint_guideline_vertical_leading"
+        app:layout_constraintEnd_toEndOf="@id/constraint_guideline_vertical_trailing" />
 
-</LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

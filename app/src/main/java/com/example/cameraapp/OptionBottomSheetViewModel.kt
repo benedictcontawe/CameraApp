@@ -5,10 +5,10 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 
-class MediaBottomSheetViewModel : ViewModel() {
+class OptionBottomSheetViewModel : ViewModel() {
 
     companion object {
-        private val TAG = MediaBottomSheetViewModel::class.java.simpleName
+        private val TAG = OptionBottomSheetViewModel::class.java.simpleName
     }
 
     private var isActive : Boolean = false
