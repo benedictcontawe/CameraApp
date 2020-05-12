@@ -3,6 +3,7 @@ package com.example.cameraapp
 import android.content.Intent
 import android.os.Bundle
 import android.provider.MediaStore
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -25,7 +26,7 @@ class OptionBottomSheetDialogFragment : BottomSheetDialogFragment(), View.OnClic
 
         const val FINAL_TAKE_PHOTO = 1
         const val FINAL_CHOOSE_PHOTO = 2
-        const val FINAL_CROP_PHOTO = 203
+        const val FINAL_CROP_PHOTO = 3
     }
 
     override fun onCreateView(inflater : LayoutInflater, container : ViewGroup?, savedInstanceState : Bundle?) : View {
@@ -112,5 +113,12 @@ class OptionBottomSheetDialogFragment : BottomSheetDialogFragment(), View.OnClic
 
     public fun launchEditPhoto() {
 
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        Log.e(TAG,"requestCode - $requestCode")
+        Log.e(TAG,"resultCode - $resultCode")
+        Log.e(TAG,"data - $data")
     }
 }
