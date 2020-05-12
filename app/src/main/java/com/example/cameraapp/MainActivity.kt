@@ -14,22 +14,24 @@ import java.io.File
 
 class MainActivity : BaseActivity(), View.OnClickListener {
 
-    private lateinit var viewModel : OptionBottomSheetViewModel
+    private lateinit var optionBottomSheetViewModel : OptionBottomSheetViewModel
 
     override fun onCreate(savedInstanceState : Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         initiateCameraX()
         image_view.setOnClickListener(this)
-        viewModel = ViewModelProvider(this).get(OptionBottomSheetViewModel::class.java)
+        optionBottomSheetViewModel = ViewModelProvider(this).get(OptionBottomSheetViewModel::class.java)
     }
 
     override fun onClick(view : View) {
         when(view) {
             image_view -> {
-                showBottomSheetFragment(
-                    OptionBottomSheetDialogFragment.newInstance()
-                )
+                if (!optionBottomSheetViewModel.isShowed()) {
+                    showBottomSheetFragment(
+                        OptionBottomSheetDialogFragment.newInstance()
+                    )
+                }
             }
         }
     }
@@ -57,11 +59,8 @@ class MainActivity : BaseActivity(), View.OnClickListener {
     private fun updateTransform() {
 
     }
-
-    private fun getImageFile() : File {
-        val filePath : String = Environment.getExternalStorageDirectory().getPath()
-        val fileName : String = "cameraXSample.jpg"
-        return File(filePath,fileName)
-    }
     //endregion
+    override fun grantedCode(requestCode: Int) {
+        optionBottomSheetViewModel.setGrantedRequestCode(requestCode)
+    }
 }

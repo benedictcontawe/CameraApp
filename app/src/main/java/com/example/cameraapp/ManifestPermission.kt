@@ -7,7 +7,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
-import android.os.Build
 import android.provider.Settings
 import android.util.Log
 import androidx.core.app.ActivityCompat
@@ -17,9 +16,16 @@ object ManifestPermission {
 
     private val TAG = ManifestPermission::class.java.simpleName
 
-    const val PERMISSION_SETTINGS_CODE = 1000
+    const val SETTINGS_PERMISSION_CODE = 1000
+    const val ALL_PERMISSION_CODE = 1001
     const val CAMERA_PERMISSION_CODE = 1004
     const val GALLERY_PERMISSION_CODE = 1006
+
+    val allPermissions = arrayOf(
+        Manifest.permission.CAMERA,
+        Manifest.permission.READ_EXTERNAL_STORAGE,
+        Manifest.permission.WRITE_EXTERNAL_STORAGE
+    )
 
     val cameraPermission = Manifest.permission.CAMERA
 
@@ -103,6 +109,6 @@ object ManifestPermission {
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY)
         intent.addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
-        activity.startActivityForResult(intent, PERMISSION_SETTINGS_CODE)
+        activity.startActivityForResult(intent, SETTINGS_PERMISSION_CODE)
     }
 }

@@ -9,7 +9,7 @@ android {
     buildToolsVersion "29.0.3"
     defaultConfig {
         applicationId "com.example.cameraapp"
-        minSdkVersion 17
+        minSdkVersion 21
         targetSdkVersion 29
         versionCode 1
         versionName "1.0"
@@ -55,6 +55,9 @@ dependencies {
     //Glide Library
     implementation 'com.github.bumptech.glide:glide:4.9.0'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.9.0'
+
+    //Easy Image Library
+    //implementation 'com.github.jkwiecien:EasyImage:2.1.0'
 
     //Kotlin Library
     implementation 'androidx.core:core-ktx:1.2.0'

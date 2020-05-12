@@ -14,7 +14,6 @@ import kotlinx.android.synthetic.main.fragment_option.*
 
 class OptionBottomSheetDialogFragment : BottomSheetDialogFragment(), View.OnClickListener {
 
-    private lateinit var viewModel : OptionBottomSheetViewModel
     private val mainActivity by lazy { activity as MainActivity }
 
     companion object {
@@ -23,6 +22,8 @@ class OptionBottomSheetDialogFragment : BottomSheetDialogFragment(), View.OnClic
         fun newInstance() : OptionBottomSheetDialogFragment {
             return OptionBottomSheetDialogFragment()
         }
+
+        private lateinit var viewModel : OptionBottomSheetViewModel
 
         const val FINAL_TAKE_PHOTO = 1
         const val FINAL_CHOOSE_PHOTO = 2
@@ -47,10 +48,16 @@ class OptionBottomSheetDialogFragment : BottomSheetDialogFragment(), View.OnClic
         viewModel = ViewModelProvider(mainActivity).get(OptionBottomSheetViewModel::class.java)
         viewModel.observeGrantedRequestCode().observe(viewLifecycleOwner, Observer {
                 grantedCode -> when(grantedCode) {
-            ManifestPermission.CAMERA_PERMISSION_CODE -> launchCamera()
-            ManifestPermission.GALLERY_PERMISSION_CODE -> launchImageDocuments()
+            ManifestPermission.CAMERA_PERMISSION_CODE -> {
+                launchCamera()
+                viewModel.acknowledgeGrantedRequestCode()
+            }
+            ManifestPermission.GALLERY_PERMISSION_CODE -> {
+                launchGallery()
+                viewModel.acknowledgeGrantedRequestCode()
+            }
         }
-            viewModel.acknowledgeGrantedRequestCode()
+
         })
     }
 
@@ -60,7 +67,7 @@ class OptionBottomSheetDialogFragment : BottomSheetDialogFragment(), View.OnClic
                 accessCamera()
             }
             tv_btn_choose_photo -> {
-                dismiss()
+                accessGallery()
             }
             tv_btn_edit_photo -> {
                 dismiss()
@@ -95,7 +102,7 @@ class OptionBottomSheetDialogFragment : BottomSheetDialogFragment(), View.OnClic
 
     public fun accessGallery() {
         ManifestPermission.checkSelfPermission( mainActivity,ManifestPermission.galleryPermissions,
-            isGranted = { launchImageDocuments() }, isDenied = {
+            isGranted = { launchGallery() }, isDenied = {
                 ManifestPermission.requestPermissions(mainActivity,
                     ManifestPermission.galleryPermissions,
                     ManifestPermission.GALLERY_PERMISSION_CODE)
@@ -104,11 +111,14 @@ class OptionBottomSheetDialogFragment : BottomSheetDialogFragment(), View.OnClic
     }
 
     private fun launchCamera() {
-        startActivityForResult(Intent(MediaStore.ACTION_IMAGE_CAPTURE),FINAL_TAKE_PHOTO)
+        val cameraIntent : Intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+        cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, viewModel.createCameraPictureFile())
+        startActivityForResult(cameraIntent, FINAL_TAKE_PHOTO)
     }
 
-    private fun launchImageDocuments() {
-
+    private fun launchGallery() {
+        val galleryIntent : Intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+        startActivityForResult(galleryIntent, FINAL_CHOOSE_PHOTO)
     }
 
     public fun launchEditPhoto() {
@@ -120,5 +130,6 @@ class OptionBottomSheetDialogFragment : BottomSheetDialogFragment(), View.OnClic
         Log.e(TAG,"requestCode - $requestCode")
         Log.e(TAG,"resultCode - $resultCode")
         Log.e(TAG,"data - $data")
+        viewModel.checkActivityResult(requestCode,resultCode,data)
     }
 }
