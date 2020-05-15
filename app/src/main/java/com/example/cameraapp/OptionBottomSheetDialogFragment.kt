@@ -25,9 +25,12 @@ class OptionBottomSheetDialogFragment : BottomSheetDialogFragment(), View.OnClic
 
         private lateinit var viewModel : OptionBottomSheetViewModel
 
-        const val FINAL_TAKE_PHOTO = 1
-        const val FINAL_CHOOSE_PHOTO = 2
-        const val FINAL_CROP_PHOTO = 3
+        const val CAMERA_MEDIA_CODE = 1
+        const val GALLERY_MEDIA_CODE = 2
+        const val CROP_MEDIA_CODE = 3
+        const val CAMERA_MEDIA_INTENT = "1"
+        const val GALLERY_MEDIA_INTENT = 2
+        const val CROP_MEDIA_INTENT = 3
     }
 
     override fun onCreateView(inflater : LayoutInflater, container : ViewGroup?, savedInstanceState : Bundle?) : View {
@@ -48,16 +51,15 @@ class OptionBottomSheetDialogFragment : BottomSheetDialogFragment(), View.OnClic
         viewModel = ViewModelProvider(mainActivity).get(OptionBottomSheetViewModel::class.java)
         viewModel.observeGrantedRequestCode().observe(viewLifecycleOwner, Observer {
                 grantedCode -> when(grantedCode) {
-            ManifestPermission.CAMERA_PERMISSION_CODE -> {
-                launchCamera()
-                viewModel.acknowledgeGrantedRequestCode()
-            }
-            ManifestPermission.GALLERY_PERMISSION_CODE -> {
-                launchGallery()
-                viewModel.acknowledgeGrantedRequestCode()
-            }
-        }
-
+                    ManifestPermission.CAMERA_PERMISSION_CODE -> {
+                        launchCamera()
+                        viewModel.acknowledgeGrantedRequestCode()
+                    }
+                    ManifestPermission.GALLERY_PERMISSION_CODE -> {
+                        launchGallery()
+                        viewModel.acknowledgeGrantedRequestCode()
+                    }
+                }
         })
     }
 
@@ -70,6 +72,7 @@ class OptionBottomSheetDialogFragment : BottomSheetDialogFragment(), View.OnClic
                 accessGallery()
             }
             tv_btn_edit_photo -> {
+                launchEditPhoto()
                 dismiss()
             }
             tv_btn_delete_photo -> {
@@ -113,12 +116,12 @@ class OptionBottomSheetDialogFragment : BottomSheetDialogFragment(), View.OnClic
     private fun launchCamera() {
         val cameraIntent : Intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
         cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, viewModel.createCameraPictureFile())
-        startActivityForResult(cameraIntent, FINAL_TAKE_PHOTO)
+        startActivityForResult(cameraIntent, CAMERA_MEDIA_CODE)
     }
 
     private fun launchGallery() {
         val galleryIntent : Intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
-        startActivityForResult(galleryIntent, FINAL_CHOOSE_PHOTO)
+        startActivityForResult(galleryIntent, GALLERY_MEDIA_CODE)
     }
 
     public fun launchEditPhoto() {
