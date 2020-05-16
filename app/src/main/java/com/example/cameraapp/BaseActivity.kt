@@ -1,5 +1,6 @@
 package com.example.cameraapp
 
+import android.content.Context
 import android.os.Bundle
 import android.os.PersistableBundle
 import android.util.Log
@@ -13,10 +14,17 @@ abstract class BaseActivity : AppCompatActivity() {
         private val TAG = BaseActivity::class.java.simpleName
     }
 
+    public fun getContext() : Context = this
+
     override fun onCreate(savedInstanceState: Bundle?, persistentState: PersistableBundle?) {
         super.onCreate(savedInstanceState, persistentState)
         Log.d(TAG,"onCreate()")
         //checkPermission()
+    }
+
+    fun showToast(message: String) {
+        Log.d(TAG,"showToast($message)")
+        Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show()
     }
 
     public fun showBottomSheetFragment(bottomSheetDialogFragment : BottomSheetDialogFragment) {
