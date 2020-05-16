@@ -24,13 +24,9 @@ class MainActivity : BaseActivity(), View.OnClickListener {
         initiateCameraX()
         image_view.setOnClickListener(this)
         optionBottomSheetViewModel = ViewModelProvider(this).get(OptionBottomSheetViewModel::class.java)
-        optionBottomSheetViewModel.observePhotoUri().observe(this, Observer { imageUri ->
-            image_view.setImageURI(imageUri)
-        })
         optionBottomSheetViewModel.observePhotoPath().observe(this, Observer { imagePath ->
             when {
                 imagePath.isNotBlank() -> {
-                    Toast.makeText(this,"Selected",Toast.LENGTH_SHORT).show()
                     Glide.with(this)
                         .asBitmap()
                         .placeholder(R.mipmap.ic_launcher)
@@ -39,11 +35,10 @@ class MainActivity : BaseActivity(), View.OnClickListener {
                         .into(image_view)
                 }
                 imagePath.isNullOrBlank() -> {
-                    Toast.makeText(this,"Nil",Toast.LENGTH_SHORT).show()
                     Glide.with(this)
                         .asBitmap()
                         .placeholder(R.mipmap.ic_launcher)
-                        //.load("")
+                        .load("")
                         .apply(RequestOptions.circleCropTransform())
                         .into(image_view)
                 }

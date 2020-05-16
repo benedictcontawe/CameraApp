@@ -9,7 +9,7 @@ android {
     buildToolsVersion "29.0.3"
     defaultConfig {
         applicationId "com.example.cameraapp"
-        minSdkVersion 21
+        minSdkVersion 17
         targetSdkVersion 29
         versionCode 1
         versionName "1.0"
@@ -61,6 +61,9 @@ dependencies {
 
     //CircularImageView
     implementation 'de.hdodenhof:circleimageview:3.0.0'
+
+    //Image Cropper
+    api 'com.theartofdev.edmodo:android-image-cropper:2.8.0'
 
     //Kotlin Library
     implementation 'androidx.core:core-ktx:1.2.0'

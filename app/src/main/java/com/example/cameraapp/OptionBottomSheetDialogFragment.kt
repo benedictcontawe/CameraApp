@@ -1,6 +1,7 @@
 package com.example.cameraapp
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Log
@@ -10,6 +11,8 @@ import android.view.ViewGroup
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import com.theartofdev.edmodo.cropper.CropImage
+import com.theartofdev.edmodo.cropper.CropImageView
 import kotlinx.android.synthetic.main.fragment_option.*
 
 class OptionBottomSheetDialogFragment : BottomSheetDialogFragment(), View.OnClickListener {
@@ -25,12 +28,8 @@ class OptionBottomSheetDialogFragment : BottomSheetDialogFragment(), View.OnClic
 
         private lateinit var viewModel : OptionBottomSheetViewModel
 
-        const val CAMERA_MEDIA_CODE = 1
-        const val GALLERY_MEDIA_CODE = 2
-        const val CROP_MEDIA_CODE = 3
-        const val CAMERA_MEDIA_INTENT = "1"
-        const val GALLERY_MEDIA_INTENT = 2
-        const val CROP_MEDIA_INTENT = 3
+        const val CAMERA_MEDIA_REQUEST_CODE = 1
+        const val GALLERY_MEDIA_REQUEST_CODE = 2
     }
 
     override fun onCreateView(inflater : LayoutInflater, container : ViewGroup?, savedInstanceState : Bundle?) : View {
@@ -50,16 +49,16 @@ class OptionBottomSheetDialogFragment : BottomSheetDialogFragment(), View.OnClic
         super.onActivityCreated(savedInstanceState)
         viewModel = ViewModelProvider(mainActivity).get(OptionBottomSheetViewModel::class.java)
         viewModel.observeGrantedRequestCode().observe(viewLifecycleOwner, Observer {
-                grantedCode -> when(grantedCode) {
-                    ManifestPermission.CAMERA_PERMISSION_CODE -> {
-                        launchCamera()
-                        viewModel.acknowledgeGrantedRequestCode()
-                    }
-                    ManifestPermission.GALLERY_PERMISSION_CODE -> {
-                        launchGallery()
-                        viewModel.acknowledgeGrantedRequestCode()
-                    }
+            grantedCode -> when(grantedCode) {
+                ManifestPermission.CAMERA_PERMISSION_CODE -> {
+                    launchCamera()
+                    viewModel.acknowledgeGrantedRequestCode()
                 }
+                ManifestPermission.GALLERY_PERMISSION_CODE -> {
+                    launchGallery()
+                    viewModel.acknowledgeGrantedRequestCode()
+                }
+            }
         })
     }
 
@@ -73,7 +72,6 @@ class OptionBottomSheetDialogFragment : BottomSheetDialogFragment(), View.OnClic
             }
             tv_btn_edit_photo -> {
                 launchEditPhoto()
-                dismiss()
             }
             tv_btn_delete_photo -> {
                 viewModel.deletePhoto()
@@ -117,23 +115,32 @@ class OptionBottomSheetDialogFragment : BottomSheetDialogFragment(), View.OnClic
     private fun launchCamera() {
         val cameraIntent : Intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
         cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, viewModel.createCameraPictureFile())
-        startActivityForResult(cameraIntent, CAMERA_MEDIA_CODE)
+        startActivityForResult(cameraIntent, CAMERA_MEDIA_REQUEST_CODE)
     }
 
     private fun launchGallery() {
         val galleryIntent : Intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
-        startActivityForResult(galleryIntent, GALLERY_MEDIA_CODE)
+        startActivityForResult(galleryIntent, GALLERY_MEDIA_REQUEST_CODE)
     }
 
     public fun launchEditPhoto() {
+        launchCropImage(viewModel.getPickedImage())
+    }
 
+    private fun launchCropImage(photoUri : Uri) {
+        CropImage.activity(photoUri)
+            .setAutoZoomEnabled(true)
+            .setActivityTitle("Edit Photo")
+            .setBorderLineColor(R.color.red)
+            .setBorderCornerColor(R.color.blue)
+            .setCropShape(CropImageView.CropShape.OVAL)
+            .setAspectRatio(1,1)
+            .start(this!!.getContext()!!, this);
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        Log.e(TAG,"requestCode - $requestCode")
-        Log.e(TAG,"resultCode - $resultCode")
-        Log.e(TAG,"data - $data")
+        Log.d(TAG, "onActivityResult($requestCode,$resultCode,$data)")
         viewModel.checkActivityResult(requestCode,resultCode,data)
     }
 }
