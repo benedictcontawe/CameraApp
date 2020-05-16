@@ -76,6 +76,7 @@ class OptionBottomSheetDialogFragment : BottomSheetDialogFragment(), View.OnClic
                 dismiss()
             }
             tv_btn_delete_photo -> {
+                viewModel.deletePhoto()
                 dismiss()
             }
             tv_btn_cancel_photo -> {

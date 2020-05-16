@@ -31,7 +31,6 @@ class OptionBottomSheetViewModel : AndroidViewModel {
     private var currentImagePath : String? = null
     private var currentImageUri : Uri? = null
     private val liveMediaPermission : MutableLiveData<Int> = MutableLiveData()
-    private val liveMediaUri : MutableLiveData<Uri> = MutableLiveData()
     private val liveMediaPath : MutableLiveData<String> = MutableLiveData()
 
     constructor(application: Application) : super(application) {
@@ -65,7 +64,6 @@ class OptionBottomSheetViewModel : AndroidViewModel {
     fun observeGrantedRequestCode() : LiveData<Int> = liveMediaPermission
     //endregion
     //region File Uri and Path
-    public fun observePhotoUri() : LiveData<Uri> = liveMediaUri
     public fun observePhotoPath() : LiveData<String> = liveMediaPath
     //endregion
     fun createCameraPictureFile() : Uri {
@@ -113,6 +111,10 @@ class OptionBottomSheetViewModel : AndroidViewModel {
         return Environment.MEDIA_MOUNTED == state
     }
 
+    public fun deletePhoto() {
+        liveMediaPath.setValue(null)
+    }
+
     private fun getRealPathFromURI(contentUri : Uri) : String? {
         var cursor : Cursor? = null
         return try {
@@ -158,7 +160,6 @@ class OptionBottomSheetViewModel : AndroidViewModel {
                 //Camera
                 Log.d(TAG,"CAMERA_MEDIA_CODE")
                 Log.d(TAG,"data - $data")
-                //liveMediaUri.setValue(data?.getData())
                 liveMediaPath.setValue(
                     currentImagePath
                 )
@@ -170,7 +171,6 @@ class OptionBottomSheetViewModel : AndroidViewModel {
                 Log.d(TAG,"data uri - ${data?.getData()}")
                 Log.d(TAG,"data path - ${data?.getData()!!.getPath()}")
                 Log.d(TAG,"data real path - ${getRealPathFromURI(data?.getData()!!)}")
-                //liveMediaUri.setValue(data?.getData())
                 liveMediaPath.setValue(
                     getRealPathFromURI(data?.getData()!!)
                 )
