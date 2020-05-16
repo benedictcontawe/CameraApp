@@ -4,6 +4,8 @@ import android.app.Activity
 import android.app.Application
 import android.content.Intent
 import android.database.Cursor
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
@@ -13,8 +15,10 @@ import androidx.core.content.FileProvider
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import java.io.ByteArrayOutputStream
 import java.io.File
-import java.util.*
+import java.io.FileOutputStream
+import java.io.IOException
 
 
 class OptionBottomSheetViewModel : AndroidViewModel {
@@ -24,9 +28,11 @@ class OptionBottomSheetViewModel : AndroidViewModel {
     }
 
     private var isActive : Boolean = false
+    private var currentImagePath : String? = null
+    private var currentImageUri : Uri? = null
     private val liveMediaPermission : MutableLiveData<Int> = MutableLiveData()
     private val liveMediaUri : MutableLiveData<Uri> = MutableLiveData()
-    private val liveFilePath : MutableLiveData<String> = MutableLiveData()
+    private val liveMediaPath : MutableLiveData<String> = MutableLiveData()
 
     constructor(application: Application) : super(application) {
 
@@ -58,9 +64,9 @@ class OptionBottomSheetViewModel : AndroidViewModel {
 
     fun observeGrantedRequestCode() : LiveData<Int> = liveMediaPermission
     //endregion
-    //region Photo Uri
+    //region File Uri and Path
     public fun observePhotoUri() : LiveData<Uri> = liveMediaUri
-    public fun observePhotoPath() : LiveData<String> = liveFilePath
+    public fun observePhotoPath() : LiveData<String> = liveMediaPath
     //endregion
     fun createCameraPictureFile() : Uri {
         val packageName : String = getApplication<Application>().applicationContext.packageName
@@ -91,17 +97,15 @@ class OptionBottomSheetViewModel : AndroidViewModel {
 
         var fileName : String
         //fileName = "${UUID.randomUUID()}_cameraXSample.jpg"
-        fileName = "${UUID.randomUUID()}_cameraXSample"
+        //fileName = "${UUID.randomUUID()}_cameraXSample"
+        fileName = "${System.currentTimeMillis()}_cameraXSample"
 
         var fileValue : File
-        fileValue = File(filePath,fileName)
+        //fileValue = File(filePath,fileName)
         fileValue = File.createTempFile(fileName,".JPG",filePath)
-        return fileValue
-    }
 
-    private fun getImagePath(uri : Uri) : String {
-        uri.getPath()
-        return ""
+        currentImagePath = "file:" + fileValue.absolutePath
+        return fileValue
     }
 
     private fun isExternalStorageWritable() : Boolean {
@@ -118,13 +122,32 @@ class OptionBottomSheetViewModel : AndroidViewModel {
             val column_index: Int = cursor!!.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)
             cursor?.moveToFirst()
             cursor?.getString(column_index)
-        } catch (e: Exception) {
-            Log.e(TAG, "getRealPathFromURI Exception : $e")
+        } catch (ex : Exception) {
+            ex.printStackTrace()
+            Log.e(TAG, "getRealPathFromURI Exception : $ex")
             ""
         } finally {
             if (cursor != null) {
                 cursor.close()
             }
+        }
+    }
+
+    private fun compressImage(file : File) {
+        //https://stackoverflow.com/questions/28760941/compress-image-file-from-camera-to-certain-size
+        val bitmap : Bitmap = BitmapFactory.decodeFile(file.absolutePath)
+        val byteArrayOutputStream : ByteArrayOutputStream = ByteArrayOutputStream()
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 10, byteArrayOutputStream)
+        val byteArray : ByteArray = byteArrayOutputStream.toByteArray()
+        Log.d(TAG,"Compressed Image Size ${byteArrayOutputStream.size()}")
+        val fileOutputStream : FileOutputStream
+        try {
+            fileOutputStream = FileOutputStream(file.absolutePath)
+            fileOutputStream.write(byteArray)
+            fileOutputStream.flush() //to avoid out of memory error
+            fileOutputStream.close()
+        } catch (ex : IOException) {
+            ex.printStackTrace()
         }
     }
 
@@ -136,6 +159,9 @@ class OptionBottomSheetViewModel : AndroidViewModel {
                 Log.d(TAG,"CAMERA_MEDIA_CODE")
                 Log.d(TAG,"data - $data")
                 //liveMediaUri.setValue(data?.getData())
+                liveMediaPath.setValue(
+                    currentImagePath
+                )
             }
             requestCode == OptionBottomSheetDialogFragment.GALLERY_MEDIA_CODE && resultCode == Activity.RESULT_OK -> {
                 //Gallery
@@ -143,8 +169,9 @@ class OptionBottomSheetViewModel : AndroidViewModel {
                 Log.d(TAG,"data Intent - ${data}")
                 Log.d(TAG,"data uri - ${data?.getData()}")
                 Log.d(TAG,"data path - ${data?.getData()!!.getPath()}")
+                Log.d(TAG,"data real path - ${getRealPathFromURI(data?.getData()!!)}")
                 //liveMediaUri.setValue(data?.getData())
-                liveFilePath.setValue(
+                liveMediaPath.setValue(
                     getRealPathFromURI(data?.getData()!!)
                 )
             }
