@@ -76,7 +76,7 @@ class OptionBottomSheetDialogFragment : BottomSheetDialogFragment(), View.OnClic
                 dismiss()
             }
             tv_btn_delete_photo -> {
-                dismiss()
+                viewModel.deletePhoto()
             }
             tv_btn_cancel_photo -> {
                 dismiss()
@@ -125,7 +125,8 @@ class OptionBottomSheetDialogFragment : BottomSheetDialogFragment(), View.OnClic
     }
 
     public fun launchEditPhoto() {
-
+        //TODO: Use Camera X Feature
+        //startActivityForResult(editIntent, CROP_MEDIA_CODE)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

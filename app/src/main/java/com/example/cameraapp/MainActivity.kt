@@ -2,14 +2,11 @@ package com.example.cameraapp
 
 import android.os.Bundle
 import android.view.View
-import android.widget.Toast
 import androidx.camera.core.CameraSelector
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import com.bumptech.glide.Glide
-import com.bumptech.glide.request.RequestOptions
 import com.google.common.util.concurrent.ListenableFuture
 import kotlinx.android.synthetic.main.activity_main.*
 //import androidx.camera.core.PreviewConfig
@@ -25,27 +22,12 @@ class MainActivity : BaseActivity(), View.OnClickListener {
         image_view.setOnClickListener(this)
         optionBottomSheetViewModel = ViewModelProvider(this).get(OptionBottomSheetViewModel::class.java)
         optionBottomSheetViewModel.observePhotoUri().observe(this, Observer { imageUri ->
-            image_view.setImageURI(imageUri)
-        })
-        optionBottomSheetViewModel.observePhotoPath().observe(this, Observer { imagePath ->
             when {
-                imagePath.isNotBlank() -> {
-                    Toast.makeText(this,"Selected",Toast.LENGTH_SHORT).show()
-                    Glide.with(this)
-                        .asBitmap()
-                        .placeholder(R.mipmap.ic_launcher)
-                        .load(imagePath)
-                        .apply(RequestOptions.circleCropTransform())
-                        .into(image_view)
+                imageUri != null -> {
+                    image_view.setImageURI(imageUri)
                 }
-                imagePath.isNullOrBlank() -> {
-                    Toast.makeText(this,"Nil",Toast.LENGTH_SHORT).show()
-                    Glide.with(this)
-                        .asBitmap()
-                        .placeholder(R.mipmap.ic_launcher)
-                        //.load("")
-                        .apply(RequestOptions.circleCropTransform())
-                        .into(image_view)
+                else -> {
+                    image_view.setImageResource(R.mipmap.ic_launcher)
                 }
             }
         })

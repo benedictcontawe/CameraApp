@@ -24,6 +24,7 @@ class OptionBottomSheetViewModel : AndroidViewModel {
     }
 
     private var isActive : Boolean = false
+    private var currentImagePath : String? = null
     private val liveMediaPermission : MutableLiveData<Int> = MutableLiveData()
     private val liveMediaUri : MutableLiveData<Uri> = MutableLiveData()
     private val liveFilePath : MutableLiveData<String> = MutableLiveData()
@@ -96,17 +97,18 @@ class OptionBottomSheetViewModel : AndroidViewModel {
         var fileValue : File
         fileValue = File(filePath,fileName)
         fileValue = File.createTempFile(fileName,".JPG",filePath)
-        return fileValue
-    }
 
-    private fun getImagePath(uri : Uri) : String {
-        uri.getPath()
-        return ""
+        currentImagePath = "file:" + fileValue.absolutePath
+        return fileValue
     }
 
     private fun isExternalStorageWritable() : Boolean {
         val state : String = Environment.getExternalStorageState()
         return Environment.MEDIA_MOUNTED == state
+    }
+
+    public fun deletePhoto() {
+        liveMediaUri.setValue(null)
     }
 
     private fun getRealPathFromURI(contentUri : Uri) : String? {
@@ -134,18 +136,21 @@ class OptionBottomSheetViewModel : AndroidViewModel {
             requestCode == OptionBottomSheetDialogFragment.CAMERA_MEDIA_CODE && resultCode == Activity.RESULT_OK -> {
                 //Camera
                 Log.d(TAG,"CAMERA_MEDIA_CODE")
-                Log.d(TAG,"data - $data")
-                //liveMediaUri.setValue(data?.getData())
+                Log.d(TAG,"data Intent - ${data}")
+                Log.d(TAG,"data uri - ${data?.getData()}")
+                Log.d(TAG,"data path - ${data?.getData()?.getPath()}")
+                liveMediaUri.setValue(
+                    Uri.parse(currentImagePath)
+                )
             }
             requestCode == OptionBottomSheetDialogFragment.GALLERY_MEDIA_CODE && resultCode == Activity.RESULT_OK -> {
                 //Gallery
                 Log.d(TAG,"GALLERY_MEDIA_CODE")
                 Log.d(TAG,"data Intent - ${data}")
                 Log.d(TAG,"data uri - ${data?.getData()}")
-                Log.d(TAG,"data path - ${data?.getData()!!.getPath()}")
-                //liveMediaUri.setValue(data?.getData())
-                liveFilePath.setValue(
-                    getRealPathFromURI(data?.getData()!!)
+                Log.d(TAG,"data path - ${data?.getData()?.getPath()}")
+                liveMediaUri.setValue(
+                    data?.getData()
                 )
             }
             else -> {
