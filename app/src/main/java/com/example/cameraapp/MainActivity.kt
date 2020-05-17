@@ -27,6 +27,7 @@ class MainActivity : BaseActivity(), View.OnClickListener {
         optionBottomSheetViewModel.observePhotoPath().observe(this, Observer { imagePath ->
             when {
                 imagePath.isNotBlank() -> {
+                    Toast.makeText(this,"isNotBlank",Toast.LENGTH_SHORT).show()
                     Glide.with(this)
                         .asBitmap()
                         .placeholder(R.mipmap.ic_launcher)
@@ -35,6 +36,7 @@ class MainActivity : BaseActivity(), View.OnClickListener {
                         .into(image_view)
                 }
                 imagePath.isNullOrBlank() -> {
+                    Toast.makeText(this,"isNullOrBlank",Toast.LENGTH_SHORT).show()
                     Glide.with(this)
                         .asBitmap()
                         .placeholder(R.mipmap.ic_launcher)

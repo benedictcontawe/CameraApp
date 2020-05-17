@@ -72,9 +72,9 @@ class OptionBottomSheetViewModel : AndroidViewModel {
     public fun observePhotoPath() : LiveData<String> = liveMediaPath
     //endregion
     //region Camera Methods
-    fun createCameraPictureFile() : Uri {
-        val packageName : String = getApplication<Application>().applicationContext.packageName
-        val authority : String = "$packageName.fileprovider"
+    public fun createCameraPictureFile() : Uri {
+        val packageName : String = getApplication<Application>().getApplicationContext().getPackageName()
+        val authority : String = "$packageName.provider"
         return when {
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.N -> {
                 FileProvider.getUriForFile(getApplication(), authority, getImageFile())
@@ -125,7 +125,7 @@ class OptionBottomSheetViewModel : AndroidViewModel {
     //region Gallery Methods
     private fun getPathFromURI(uri : Uri) : String? {
         val isFile : Boolean = "file".equals(uri.scheme, ignoreCase = true)
-        return when{
+        return when {
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT -> { //DocumentProvider
                 getKitKatPathFromURI(uri)
             }
@@ -136,7 +136,7 @@ class OptionBottomSheetViewModel : AndroidViewModel {
                 uri.getPath()
             }
             else -> {
-                null
+                getDataColumn(uri,null,null)
             }
         }.toString()
     }
@@ -144,7 +144,8 @@ class OptionBottomSheetViewModel : AndroidViewModel {
     @RequiresApi(Build.VERSION_CODES.KITKAT)
     private fun getKitKatPathFromURI(uri : Uri) : String? {
         val isDocumentUri : Boolean = DocumentsContract.isDocumentUri(getApplication(), uri)
-        return when{
+        val isFile : Boolean = "file".equals(uri.scheme, ignoreCase = true)
+        return when {
             isDocumentUri && isExternalStorageDocument(uri) || isMediaDocument(uri) -> {
                 val docId : String = DocumentsContract.getDocumentId(uri)
                 val split : Array<String> = docId.split(":").toTypedArray()
@@ -174,7 +175,7 @@ class OptionBottomSheetViewModel : AndroidViewModel {
                         )
                     }
                     else -> {
-                        null
+                        getDataColumn(uri,null,null)
                     }
                 }
             }
@@ -192,15 +193,18 @@ class OptionBottomSheetViewModel : AndroidViewModel {
                         )
                     } catch (ex : NumberFormatException) {
                         ex.printStackTrace()
-                        Log.e(TAG, "isDocumentProvider && isDownloadsDocument NumberFormatException : ${ex.message}")
+                        Log.e(TAG, "getKitKatPathFromURI NumberFormatException : ${ex.message}")
                         null
                     }
                 } else {
-                    null
+                    getDataColumn(uri,null,null)
                 }
             }
+            isFile -> { //File
+                uri.getPath()
+            }
             else -> {
-                null
+                getDataColumn(uri,null,null)
             }
         }
     }
@@ -232,7 +236,7 @@ class OptionBottomSheetViewModel : AndroidViewModel {
         val proj = arrayOf(column)
         return try {
             cursor = getApplication<Application>().getContentResolver().query(uri, proj, selection, selectionArgs, null)
-            val column_index: Int = cursor!!.getColumnIndexOrThrow(column)
+            val column_index: Int = cursor?.getColumnIndexOrThrow(column)!!
             cursor.moveToFirst()
             cursor.getString(column_index)
         } catch (ex : Exception) {
@@ -303,19 +307,21 @@ class OptionBottomSheetViewModel : AndroidViewModel {
     //region Compress Image
     private fun compressImage(file : File) {
         //https://stackoverflow.com/questions/28760941/compress-image-file-from-camera-to-certain-size
-        val bitmap : Bitmap = BitmapFactory.decodeFile(file.absolutePath)
-        val byteArrayOutputStream : ByteArrayOutputStream = ByteArrayOutputStream()
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 10, byteArrayOutputStream)
-        val byteArray : ByteArray = byteArrayOutputStream.toByteArray()
-        Log.d(TAG,"Compressed Image Size ${byteArrayOutputStream.size()}")
-        val fileOutputStream : FileOutputStream
         try {
+            val bitmap : Bitmap = BitmapFactory.decodeFile(file.absolutePath)
+            val byteArrayOutputStream : ByteArrayOutputStream = ByteArrayOutputStream()
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 10, byteArrayOutputStream)
+            val byteArray : ByteArray = byteArrayOutputStream.toByteArray()
+            Log.d(TAG,"Compressed Image Size ${byteArrayOutputStream.size()}")
+            val fileOutputStream : FileOutputStream
+
             fileOutputStream = FileOutputStream(file.absolutePath)
             fileOutputStream.write(byteArray)
             fileOutputStream.flush() //to avoid out of memory error
             fileOutputStream.close()
         } catch (ex : IOException) {
             ex.printStackTrace()
+            Log.e(TAG, "compressImage IOException : ${ex.message}")
         }
     }
     //endregion
@@ -331,6 +337,8 @@ class OptionBottomSheetViewModel : AndroidViewModel {
                 //Camera
                 Log.d(TAG,"CAMERA_MEDIA_REQUEST_CODE")
                 currentImageUri = null
+                //Log.d(TAG,"File ${File(currentImagePath)}")
+                //compressImage(File(currentImagePath))
                 liveMediaPath.setValue(
                     currentImagePath
                 )
