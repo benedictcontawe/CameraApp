@@ -30,6 +30,18 @@ class OptionBottomSheetViewModel : AndroidViewModel {
 
     companion object {
         private val TAG = OptionBottomSheetViewModel::class.java.simpleName
+
+        private fun isDocumentUri(application : Application, uri : Uri) : Boolean {
+            return DocumentsContract.isDocumentUri(application, uri)
+        }
+
+        private fun isContent(uri : Uri) : Boolean {
+            return "content".equals(uri.scheme, ignoreCase = true)
+        }
+
+        private fun isFile(uri : Uri) : Boolean {
+            return "file".equals(uri.scheme, ignoreCase = true)
+        }
     }
 
     private var isActive : Boolean = false
@@ -124,15 +136,14 @@ class OptionBottomSheetViewModel : AndroidViewModel {
     //endregion
     //region Gallery Methods
     private fun getPathFromURI(uri : Uri) : String? {
-        val isFile : Boolean = "file".equals(uri.scheme, ignoreCase = true)
         return when {
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT -> { //DocumentProvider
                 getKitKatPathFromURI(uri)
             }
-            "content".equals(uri.scheme, ignoreCase = true) -> { //MediaStore (and general)
+            isContent(uri) -> { //MediaStore (and general)
                 getMediaStorePathFromURI(uri)
             }
-            isFile -> { //File
+            isFile(uri) -> { //File
                 uri.getPath()
             }
             else -> {
@@ -143,10 +154,8 @@ class OptionBottomSheetViewModel : AndroidViewModel {
 
     @RequiresApi(Build.VERSION_CODES.KITKAT)
     private fun getKitKatPathFromURI(uri : Uri) : String? {
-        val isDocumentUri : Boolean = DocumentsContract.isDocumentUri(getApplication(), uri)
-        val isFile : Boolean = "file".equals(uri.scheme, ignoreCase = true)
         return when {
-            isDocumentUri && isExternalStorageDocument(uri) || isMediaDocument(uri) -> {
+            isDocumentUri(getApplication(), uri) && isExternalStorageDocument(uri) || isMediaDocument(uri) -> {
                 val docId : String = DocumentsContract.getDocumentId(uri)
                 val split : Array<String> = docId.split(":").toTypedArray()
                 val type : String = split[0]
@@ -179,7 +188,7 @@ class OptionBottomSheetViewModel : AndroidViewModel {
                     }
                 }
             }
-            isDocumentUri && isDownloadsDocument(uri) -> {
+            isDocumentUri(getApplication(), uri) && isDownloadsDocument(uri) -> {
                 val id : String = DocumentsContract.getDocumentId(uri)
                 if (!TextUtils.isEmpty(id)) {
                     try {
@@ -200,7 +209,10 @@ class OptionBottomSheetViewModel : AndroidViewModel {
                     getDataColumn(uri,null,null)
                 }
             }
-            isFile -> { //File
+            isContent(uri) -> { //MediaStore (and general)
+                getMediaStorePathFromURI(uri)
+            }
+            isFile(uri) -> { //File
                 uri.getPath()
             }
             else -> {
@@ -292,6 +304,7 @@ class OptionBottomSheetViewModel : AndroidViewModel {
         return when (currentImageUri) {
             null -> {
                 Uri.parse(currentImagePath)
+                //Uri.fromFile(File(currentImagePath))
             }
             else -> {
                 currentImageUri
