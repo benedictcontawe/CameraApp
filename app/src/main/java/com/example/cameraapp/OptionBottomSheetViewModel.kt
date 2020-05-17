@@ -25,12 +25,28 @@ import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
 
-
 class OptionBottomSheetViewModel : AndroidViewModel {
 
     companion object {
         private val TAG = OptionBottomSheetViewModel::class.java.simpleName
 
+        private fun isPrimary(type : String) : Boolean {
+            return "primary".equals(type, ignoreCase = true)
+        }
+
+        private fun isImage(type : String) : Boolean {
+            return "image".equals(type)
+        }
+
+        private fun isVideo(type : String) : Boolean {
+            return "video".equals(type)
+        }
+
+        private fun isAudio(type : String) : Boolean {
+            return "audio".equals(type)
+        }
+
+        @RequiresApi(Build.VERSION_CODES.KITKAT)
         private fun isDocumentUri(application : Application, uri : Uri) : Boolean {
             return DocumentsContract.isDocumentUri(application, uri)
         }
@@ -51,7 +67,7 @@ class OptionBottomSheetViewModel : AndroidViewModel {
     private val liveMediaPath : MutableLiveData<String> = MutableLiveData()
 
     constructor(application: Application) : super(application) {
-
+        Log.d(TAG,"constructor")
     }
     //region Life Cycle Aware Methods
     fun setResume() { Log.d(TAG,"setResume()")
@@ -75,30 +91,34 @@ class OptionBottomSheetViewModel : AndroidViewModel {
     }
 
     fun acknowledgeGrantedRequestCode() {
+        Log.d(TAG,"acknowledgeGrantedRequestCode()")
         liveMediaPermission.setValue(0)
     }
 
     fun observeGrantedRequestCode() : LiveData<Int> = liveMediaPermission
     //endregion
-    //region File Uri and Path
+    //region Observer Method
     public fun observePhotoPath() : LiveData<String> = liveMediaPath
     //endregion
     //region Camera Methods
-    public fun createCameraPictureFile() : Uri {
+    fun createCameraPictureFile() : Uri {
+        Log.d(TAG,"createCameraPictureFile()")
         val packageName : String = getApplication<Application>().getApplicationContext().getPackageName()
         val authority : String = "$packageName.provider"
         return when {
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.N -> {
+                Log.d(TAG,"Build.VERSION.SDK_INT >= Build.VERSION_CODES.N")
                 FileProvider.getUriForFile(getApplication(), authority, getImageFile())
             }
             else -> {
+                Log.d(TAG,"else")
                 Uri.fromFile(getImageFile())
             }
         }
     }
 
     private fun getImageFile() : File {
-        // This PC\Galaxy J4+\Phone\Android\data\com.example.cameraapp\cache\CameraX
+        Log.d(TAG,"getImageFile()")
         var cacheDir : File = getApplication<Application>().getCacheDir()
         if (isExternalStorageWritable()) {
             cacheDir = getApplication<Application>().getExternalCacheDir()!!
@@ -106,7 +126,7 @@ class OptionBottomSheetViewModel : AndroidViewModel {
         Log.d(TAG,"cacheDir - $cacheDir")
 
         val filePath : File
-        filePath = File(cacheDir,"CameraX")
+        filePath = File(cacheDir,"Photo")
         //filePath = Environment.getExternalStorageDirectory().getPath()
         if (!filePath.exists()) {
             filePath.mkdirs()
@@ -114,15 +134,13 @@ class OptionBottomSheetViewModel : AndroidViewModel {
         Log.d(TAG,"filePath - $filePath")
 
         val fileName : String
-        //fileName = "${UUID.randomUUID()}_cameraXSample.jpg"
-        //fileName = "${UUID.randomUUID()}_cameraXSample"
-        fileName = "${System.currentTimeMillis()}_cameraXSample"
+        fileName = "JPEG_${System.currentTimeMillis()}"
         Log.d(TAG,"fileName - $fileName")
 
         val fileValue : File
         //fileValue = File(filePath,fileName)
         fileValue = File.createTempFile(fileName,".JPG",filePath)
-        Log.d(TAG,"fileName - $fileValue")
+        Log.d(TAG,"fileValue - $fileValue")
 
         currentImagePath = "file:" + fileValue.absolutePath
         Log.d(TAG,"currentImagePath - $currentImagePath")
@@ -131,22 +149,28 @@ class OptionBottomSheetViewModel : AndroidViewModel {
 
     private fun isExternalStorageWritable() : Boolean {
         val state : String = Environment.getExternalStorageState()
+        Log.d(TAG,"isExternalStorageWritable() : ${Environment.MEDIA_MOUNTED == state}")
         return Environment.MEDIA_MOUNTED == state
     }
     //endregion
     //region Gallery Methods
-    private fun getPathFromURI(uri : Uri) : String? {
+    public fun getPathFromURI(uri : Uri) : String? {
+        Log.d(TAG,"getPathFromURI($uri)")
         return when {
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT -> { //DocumentProvider
+                Log.d(TAG,"Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT")
                 getKitKatPathFromURI(uri)
             }
             isContent(uri) -> { //MediaStore (and general)
+                Log.d(TAG,"isContent($uri)")
                 getMediaStorePathFromURI(uri)
             }
             isFile(uri) -> { //File
+                Log.d(TAG,"isFile($uri)")
                 uri.getPath()
             }
             else -> {
+                Log.d(TAG,"else")
                 getDataColumn(uri,null,null)
             }
         }.toString()
@@ -154,6 +178,7 @@ class OptionBottomSheetViewModel : AndroidViewModel {
 
     @RequiresApi(Build.VERSION_CODES.KITKAT)
     private fun getKitKatPathFromURI(uri : Uri) : String? {
+        Log.d(TAG,"getKitKatPathFromURI($uri)")
         return when {
             isDocumentUri(getApplication(), uri) && isExternalStorageDocument(uri) || isMediaDocument(uri) -> {
                 val docId : String = DocumentsContract.getDocumentId(uri)
@@ -162,35 +187,42 @@ class OptionBottomSheetViewModel : AndroidViewModel {
                 val selection : String = "_id=?"
                 val selectionArgs : Array<String> = arrayOf(split[1])
                 when {
-                    "primary".equals(type, ignoreCase = true) -> {
+                    isPrimary(type) -> {
+                        Log.d(TAG,"isPrimary($type)")
                         Environment.getExternalStorageDirectory().toString() + "/" + split[1]
                     }
-                    "image".equals(type) -> {
+                    isImage(type) -> {
+                        Log.d(TAG,"isImage($type)")
                         getDataColumn(
                             MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
                             selection, selectionArgs
                         )
                     }
-                    "video".equals(type) -> {
+                    isVideo(type) -> {
+                        Log.d(TAG,"isVideo($type)")
                         getDataColumn(
                             MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
                             selection, selectionArgs
                         )
                     }
-                    "audio".equals(type) -> {
+                    isAudio(type) -> {
+                        Log.d(TAG,"isAudio($type)")
                         getDataColumn(
                             MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
                             selection, selectionArgs
                         )
                     }
                     else -> {
+                        Log.d(TAG,"else")
                         getDataColumn(uri,null,null)
                     }
                 }
             }
             isDocumentUri(getApplication(), uri) && isDownloadsDocument(uri) -> {
+                Log.d(TAG,"isDocumentUri(getApplication(), uri) && isDownloadsDocument(uri)")
                 val id : String = DocumentsContract.getDocumentId(uri)
                 if (!TextUtils.isEmpty(id)) {
+                    Log.d(TAG,"!TextUtils.isEmpty(id)")
                     try {
                         getDataColumn(
                             ContentUris.withAppendedId(
@@ -206,27 +238,34 @@ class OptionBottomSheetViewModel : AndroidViewModel {
                         null
                     }
                 } else {
+                    Log.d(TAG,"else")
                     getDataColumn(uri,null,null)
                 }
             }
             isContent(uri) -> { //MediaStore (and general)
+                Log.d(TAG,"isContent($uri) ${getMediaStorePathFromURI(uri)}")
                 getMediaStorePathFromURI(uri)
             }
             isFile(uri) -> { //File
+                Log.d(TAG,"isFile($uri) ${uri.getPath()}")
                 uri.getPath()
             }
             else -> {
+                Log.d(TAG,"else")
                 getDataColumn(uri,null,null)
             }
         }
     }
 
     private fun getMediaStorePathFromURI(uri : Uri) : String? {
+        Log.d(TAG,"getMediaStorePathFromURI($uri)")
         return when(isGooglePhotosUri(uri)) {
             true -> {
+                Log.d(TAG,"true ${uri.getLastPathSegment()}")
                 uri.getLastPathSegment()
             }
             false -> {
+                Log.d(TAG,"false ${getDataColumn(uri, null, null)}")
                 getDataColumn(uri, null, null)
             }
         }
@@ -247,9 +286,11 @@ class OptionBottomSheetViewModel : AndroidViewModel {
         val column = MediaStore.Images.Media.DATA
         val proj = arrayOf(column)
         return try {
+            Log.d(TAG,"try")
             cursor = getApplication<Application>().getContentResolver().query(uri, proj, selection, selectionArgs, null)
             val column_index: Int = cursor?.getColumnIndexOrThrow(column)!!
             cursor.moveToFirst()
+            Log.d(TAG,"getDataColumn($uri,$selection,$selectionArgs) : ${cursor.getString(column_index)}")
             cursor.getString(column_index)
         } catch (ex : Exception) {
             ex.printStackTrace()
@@ -268,7 +309,8 @@ class OptionBottomSheetViewModel : AndroidViewModel {
      * @return Whether the Uri authority is ExternalStorageProvider.
      * @author Ferer Atlus
      */
-    private fun isExternalStorageDocument(uri : Uri): Boolean {
+    private fun isExternalStorageDocument(uri : Uri) : Boolean {
+        Log.d(TAG,"isExternalStorageDocument($uri)")
         return "com.android.externalstorage.documents" == uri.authority
     }
 
@@ -277,7 +319,8 @@ class OptionBottomSheetViewModel : AndroidViewModel {
      * @return Whether the Uri authority is DownloadsProvider.
      * @author Ferer Atlus
      */
-    private fun isDownloadsDocument(uri : Uri): Boolean {
+    private fun isDownloadsDocument(uri : Uri) : Boolean {
+        Log.d(TAG,"isDownloadsDocument($uri)")
         return "com.android.providers.downloads.documents" == uri.authority
     }
 
@@ -287,6 +330,7 @@ class OptionBottomSheetViewModel : AndroidViewModel {
      * @author Ferer Atlus
      */
     fun isMediaDocument(uri : Uri) : Boolean {
+        Log.d(TAG,"isMediaDocument($uri)")
         return "com.android.providers.media.documents" == uri.authority
     }
 
@@ -296,17 +340,21 @@ class OptionBottomSheetViewModel : AndroidViewModel {
      * @author Ferer Atlus
      */
     private fun isGooglePhotosUri(uri : Uri) : Boolean {
+        Log.d(TAG,"isGooglePhotosUri($uri)")
         return "com.google.android.apps.photos.content" == uri.authority
     }
     //endregion
     //region Edit Methods
     public fun getPickedImage() : Uri {
+        Log.d(TAG,"getPickedImage()")
         return when (currentImageUri) {
             null -> {
+                Log.d(TAG,"currentImageUri == null")
                 Uri.parse(currentImagePath)
                 //Uri.fromFile(File(currentImagePath))
             }
             else -> {
+                Log.d(TAG,"else")
                 currentImageUri
             }
         }!!
@@ -314,27 +362,75 @@ class OptionBottomSheetViewModel : AndroidViewModel {
     //endregion
     //region Delete Methods
     public fun deletePhoto() {
+        Log.d(TAG,"deletePhoto()")
         liveMediaPath.setValue("")
     }
     //endregion
     //region Compress Image
     private fun compressImage(file : File) {
+        Log.d(TAG, "compressImage($file)")
         //https://stackoverflow.com/questions/28760941/compress-image-file-from-camera-to-certain-size
+        Log.e(TAG,"File Length Before ${file.size}")
+        Log.e(TAG,"File size in KB Before ${file.sizeInKb}")
+        Log.e(TAG,"File size in MB Before ${file.sizeInMb}")
         try {
+            Log.d(TAG, "try")
             val bitmap : Bitmap = BitmapFactory.decodeFile(file.absolutePath)
             val byteArrayOutputStream : ByteArrayOutputStream = ByteArrayOutputStream()
+            Log.e(TAG,"Compressing Image Size ${byteArrayOutputStream.size()}")
             bitmap.compress(Bitmap.CompressFormat.JPEG, 10, byteArrayOutputStream)
             val byteArray : ByteArray = byteArrayOutputStream.toByteArray()
-            Log.d(TAG,"Compressed Image Size ${byteArrayOutputStream.size()}")
-            val fileOutputStream : FileOutputStream
+            Log.e(TAG,"Compressed Image Size ${byteArrayOutputStream.size()}")
 
+            val fileOutputStream : FileOutputStream
             fileOutputStream = FileOutputStream(file.absolutePath)
             fileOutputStream.write(byteArray)
             fileOutputStream.flush() //to avoid out of memory error
             fileOutputStream.close()
+
+            Log.e(TAG,"File Length After ${file.size}")
+            Log.e(TAG,"File size in KB After ${file.sizeInKb}")
+            Log.e(TAG,"File size in MB After ${file.sizeInMb}")
         } catch (ex : IOException) {
             ex.printStackTrace()
             Log.e(TAG, "compressImage IOException : ${ex.message}")
+        }
+    }
+
+    private fun compressImageToOneMB(file : File) {
+        Log.d(TAG, "compressImageToOneMB($file)")
+        Log.e(TAG, "File Length Before ${file.size}")
+        Log.e(TAG, "File size in KB Before ${file.sizeInKb}")
+        Log.e(TAG, "File size in MB Before ${file.sizeInMb}")
+        when (file.sizeInMb >= 1.0) {
+            true -> {
+                Log.e(TAG, "true file.sizeInMb >= 1.0")
+                try {
+                    Log.d(TAG, "try")
+                    val bitmap: Bitmap = BitmapFactory.decodeFile(file.absolutePath)
+                    val byteArrayOutputStream: ByteArrayOutputStream = ByteArrayOutputStream()
+                    Log.e(TAG, "Compressing Image Size ${byteArrayOutputStream.size()}")
+                    bitmap.compress(Bitmap.CompressFormat.JPEG, 10, byteArrayOutputStream)
+                    val byteArray: ByteArray = byteArrayOutputStream.toByteArray()
+                    Log.e(TAG, "Compressed Image Size ${byteArrayOutputStream.size()}")
+
+                    val fileOutputStream: FileOutputStream
+                    fileOutputStream = FileOutputStream(file.absolutePath)
+                    fileOutputStream.write(byteArray)
+                    fileOutputStream.flush() //to avoid out of memory error
+                    fileOutputStream.close()
+
+                    Log.e(TAG, "File Length After ${file.size}")
+                    Log.e(TAG, "File size in KB After ${file.sizeInKb}")
+                    Log.e(TAG, "File size in MB After ${file.sizeInMb}")
+                } catch (ex: IOException) {
+                    ex.printStackTrace()
+                    Log.e(TAG, "compressImage IOException : ${ex.message}")
+                }
+            }
+            false -> {
+                Log.e(TAG, "false file.sizeInMb >= 1.0")
+            }
         }
     }
     //endregion
@@ -350,8 +446,10 @@ class OptionBottomSheetViewModel : AndroidViewModel {
                 //Camera
                 Log.d(TAG,"CAMERA_MEDIA_REQUEST_CODE")
                 currentImageUri = null
-                //Log.d(TAG,"File ${File(currentImagePath)}")
-                //compressImage(File(currentImagePath))
+                Log.e(TAG,"File - ${File(currentImagePath)}")
+                Log.e(TAG,"File Length ${File(currentImagePath).size}")
+                Log.e(TAG,"File size in KB ${File(currentImagePath).sizeInKb}")
+                Log.e(TAG,"File size in MB ${File(currentImagePath).sizeInMb}")
                 liveMediaPath.setValue(
                     currentImagePath
                 )
@@ -361,6 +459,10 @@ class OptionBottomSheetViewModel : AndroidViewModel {
                 Log.d(TAG,"GALLERY_MEDIA_REQUEST_CODE")
                 currentImagePath = getPathFromURI(data?.getData()!!)
                 currentImageUri = data?.getData()
+                Log.e(TAG,"File - ${File(getPathFromURI(currentImageUri!!))}")
+                Log.e(TAG,"File Length ${File(getPathFromURI(currentImageUri!!)).size}")
+                Log.e(TAG,"File size in KB ${File(getPathFromURI(currentImageUri!!)).sizeInKb}")
+                Log.e(TAG,"File size in MB ${File(currentImagePath).sizeInMb}")
                 liveMediaPath.setValue(
                     currentImagePath
                 )
@@ -368,12 +470,18 @@ class OptionBottomSheetViewModel : AndroidViewModel {
             requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE && resultCode == Activity.RESULT_OK -> {
                 //Crop Image
                 Log.d(TAG,"CROP_IMAGE_ACTIVITY_REQUEST_CODE")
-                val result : CropImage.ActivityResult = CropImage.getActivityResult(data);
+                val result : CropImage.ActivityResult = CropImage.getActivityResult(data)
+                Log.e(TAG,"uri path - ${getPathFromURI(result.uri)}")
+                Log.e(TAG,"File - ${File(getPathFromURI(result.uri))}")
+                compressImageToOneMB(
+                    File(getPathFromURI(result.uri))
+                )
                 liveMediaPath.setValue(
                     getPathFromURI(result.uri)
                 )
             }
             requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE && resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE -> {
+                Log.d(TAG,"CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE")
                 val result : CropImage.ActivityResult = CropImage.getActivityResult(data);
                 Log.e(TAG,"Unrecognized error code ${result.getError()}")
             }

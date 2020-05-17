@@ -93,7 +93,7 @@ class OptionBottomSheetDialogFragment : BottomSheetDialogFragment(), View.OnClic
         viewModel.setPause()
     }
 
-    public fun accessCamera() {
+    private fun accessCamera() {
         ManifestPermission.checkSelfPermission(mainActivity, ManifestPermission.cameraPermission,
             isGranted = { launchCamera() },
             isDenied = { ManifestPermission.requestPermissions(mainActivity,
@@ -102,7 +102,7 @@ class OptionBottomSheetDialogFragment : BottomSheetDialogFragment(), View.OnClic
         )
     }
 
-    public fun accessGallery() {
+    private fun accessGallery() {
         ManifestPermission.checkSelfPermission( mainActivity,ManifestPermission.galleryPermissions,
             isGranted = { launchGallery() }, isDenied = {
                 ManifestPermission.requestPermissions(mainActivity,
@@ -123,7 +123,7 @@ class OptionBottomSheetDialogFragment : BottomSheetDialogFragment(), View.OnClic
         startActivityForResult(galleryIntent, GALLERY_MEDIA_REQUEST_CODE)
     }
 
-    public fun launchEditPhoto() {
+    private fun launchEditPhoto() {
         launchCropImage(viewModel.getPickedImage())
     }
 
@@ -138,7 +138,7 @@ class OptionBottomSheetDialogFragment : BottomSheetDialogFragment(), View.OnClic
             .start(this!!.getContext()!!, this);
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+    override fun onActivityResult(requestCode : Int, resultCode : Int, data : Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         Log.d(TAG, "onActivityResult($requestCode,$resultCode,$data)")
         viewModel.checkActivityResult(requestCode,resultCode,data)
