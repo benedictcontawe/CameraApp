@@ -1,4 +1,4 @@
-package com.example.cameraapp
+package com.example.cameraapp.view
 
 import android.content.Intent
 import android.net.Uri
@@ -10,6 +10,9 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import com.example.cameraapp.OptionBottomSheetViewModel
+import com.example.cameraapp.R
+import com.example.cameraapp.util.ManifestPermission
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.theartofdev.edmodo.cropper.CropImage
 import com.theartofdev.edmodo.cropper.CropImageView
@@ -47,7 +50,8 @@ class OptionBottomSheetDialogFragment : BottomSheetDialogFragment(), View.OnClic
 
     override fun onActivityCreated(savedInstanceState : Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        viewModel = ViewModelProvider(mainActivity).get(OptionBottomSheetViewModel::class.java)
+        viewModel = ViewModelProvider(mainActivity).get(
+            OptionBottomSheetViewModel::class.java)
         viewModel.observeGrantedRequestCode().observe(viewLifecycleOwner, Observer {
             grantedCode -> when(grantedCode) {
                 ManifestPermission.CAMERA_PERMISSION_CODE -> {
@@ -103,7 +107,8 @@ class OptionBottomSheetDialogFragment : BottomSheetDialogFragment(), View.OnClic
     }
 
     private fun accessGallery() {
-        ManifestPermission.checkSelfPermission( mainActivity,ManifestPermission.galleryPermissions,
+        ManifestPermission.checkSelfPermission( mainActivity,
+            ManifestPermission.galleryPermissions,
             isGranted = { launchGallery() }, isDenied = {
                 ManifestPermission.requestPermissions(mainActivity,
                     ManifestPermission.galleryPermissions,
@@ -115,12 +120,16 @@ class OptionBottomSheetDialogFragment : BottomSheetDialogFragment(), View.OnClic
     private fun launchCamera() {
         val cameraIntent : Intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
         cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, viewModel.createCameraPictureFile())
-        startActivityForResult(cameraIntent, CAMERA_MEDIA_REQUEST_CODE)
+        startActivityForResult(cameraIntent,
+            CAMERA_MEDIA_REQUEST_CODE
+        )
     }
 
     private fun launchGallery() {
         val galleryIntent : Intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
-        startActivityForResult(galleryIntent, GALLERY_MEDIA_REQUEST_CODE)
+        startActivityForResult(galleryIntent,
+            GALLERY_MEDIA_REQUEST_CODE
+        )
     }
 
     private fun launchEditPhoto() {

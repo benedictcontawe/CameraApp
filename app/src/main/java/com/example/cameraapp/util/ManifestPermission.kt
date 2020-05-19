@@ -1,4 +1,4 @@
-package com.example.cameraapp
+package com.example.cameraapp.util
 
 import android.Manifest
 import android.app.Activity
@@ -92,7 +92,9 @@ object ManifestPermission {
         builder.setMessage(message)
         builder.setPositiveButton("SETTINGS") { dialog, which ->
             dialog.dismiss()
-            showAppPermissionSettings(activity)
+            showAppPermissionSettings(
+                activity
+            )
         }
         builder.setNegativeButton("NOT NOW") { dialog, which ->
             dialog.dismiss()
@@ -109,6 +111,8 @@ object ManifestPermission {
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY)
         intent.addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
-        activity.startActivityForResult(intent, SETTINGS_PERMISSION_CODE)
+        activity.startActivityForResult(intent,
+            SETTINGS_PERMISSION_CODE
+        )
     }
 }

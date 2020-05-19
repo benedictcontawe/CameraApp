@@ -1,4 +1,4 @@
-package com.example.cameraapp
+package com.example.cameraapp.extension
 
 import java.io.File
 

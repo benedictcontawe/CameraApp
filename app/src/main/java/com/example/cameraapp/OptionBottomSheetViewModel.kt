@@ -19,6 +19,12 @@ import androidx.core.content.FileProvider
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import com.example.cameraapp.extension.size
+import com.example.cameraapp.extension.sizeInKb
+import com.example.cameraapp.extension.sizeInMb
+import com.example.cameraapp.util.Coroutines
+import com.example.cameraapp.util.ManifestPermission
+import com.example.cameraapp.view.OptionBottomSheetDialogFragment
 import com.theartofdev.edmodo.cropper.CropImage
 import java.io.ByteArrayOutputStream
 import java.io.File
@@ -297,6 +303,7 @@ class OptionBottomSheetViewModel : AndroidViewModel {
             Log.e(TAG, "getDataColumn Exception : ${ex.message}")
             ""
         } catch (ex : IllegalArgumentException) {
+            ex.printStackTrace()
             Log.e(TAG, "getDataColumn IllegalArgumentException : ${ex.message}")
             ""
         } finally {
@@ -369,68 +376,78 @@ class OptionBottomSheetViewModel : AndroidViewModel {
     //region Compress Image
     private fun compressImage(file : File) {
         Log.d(TAG, "compressImage($file)")
-        //https://stackoverflow.com/questions/28760941/compress-image-file-from-camera-to-certain-size
-        Log.e(TAG,"File Length Before ${file.size}")
-        Log.e(TAG,"File size in KB Before ${file.sizeInKb}")
-        Log.e(TAG,"File size in MB Before ${file.sizeInMb}")
-        try {
-            Log.d(TAG, "try")
-            val bitmap : Bitmap = BitmapFactory.decodeFile(file.absolutePath)
-            val byteArrayOutputStream : ByteArrayOutputStream = ByteArrayOutputStream()
-            Log.e(TAG,"Compressing Image Size ${byteArrayOutputStream.size()}")
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 10, byteArrayOutputStream)
-            val byteArray : ByteArray = byteArrayOutputStream.toByteArray()
-            Log.e(TAG,"Compressed Image Size ${byteArrayOutputStream.size()}")
+        Log.d(TAG,"File Length Before ${file.size}")
+        Log.d(TAG,"File size in KB Before ${file.sizeInKb}")
+        Log.d(TAG,"File size in MB Before ${file.sizeInMb}")
+        Coroutines.default {
+            try {
+                Log.d(TAG, "try")
+                val bitmap : Bitmap = BitmapFactory.decodeFile(file.absolutePath)
+                val byteArrayOutputStream : ByteArrayOutputStream = ByteArrayOutputStream()
+                Log.d(TAG,"Compressing Image Size ${byteArrayOutputStream.size()}")
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 10, byteArrayOutputStream)
+                val byteArray : ByteArray = byteArrayOutputStream.toByteArray()
+                Log.d(TAG,"Compressed Image Size ${byteArrayOutputStream.size()}")
 
-            val fileOutputStream : FileOutputStream
-            fileOutputStream = FileOutputStream(file.absolutePath)
-            fileOutputStream.write(byteArray)
-            fileOutputStream.flush() //to avoid out of memory error
-            fileOutputStream.close()
+                val fileOutputStream : FileOutputStream
+                fileOutputStream = FileOutputStream(file.absolutePath)
+                fileOutputStream.write(byteArray)
+                fileOutputStream.flush() //to avoid out of memory error
+                fileOutputStream.close()
 
-            Log.e(TAG,"File Length After ${file.size}")
-            Log.e(TAG,"File size in KB After ${file.sizeInKb}")
-            Log.e(TAG,"File size in MB After ${file.sizeInMb}")
-        } catch (ex : IOException) {
-            ex.printStackTrace()
-            Log.e(TAG, "compressImage IOException : ${ex.message}")
+                Log.d(TAG,"File Length After ${file.size}")
+                Log.d(TAG,"File size in KB After ${file.sizeInKb}")
+                Log.d(TAG,"File size in MB After ${file.sizeInMb}")
+            } catch (ex : IOException) {
+                ex.printStackTrace()
+                Log.e(TAG, "compressImage IOException : ${ex.message}")
+            }
         }
     }
 
     private fun compressImageToOneMB(file : File) {
         Log.d(TAG, "compressImageToOneMB($file)")
-        Log.e(TAG, "File Length Before ${file.size}")
-        Log.e(TAG, "File size in KB Before ${file.sizeInKb}")
-        Log.e(TAG, "File size in MB Before ${file.sizeInMb}")
-        when (file.sizeInMb >= 1.0) {
-            true -> {
-                Log.e(TAG, "true file.sizeInMb >= 1.0")
-                try {
-                    Log.d(TAG, "try")
-                    val bitmap: Bitmap = BitmapFactory.decodeFile(file.absolutePath)
-                    val byteArrayOutputStream: ByteArrayOutputStream = ByteArrayOutputStream()
-                    Log.e(TAG, "Compressing Image Size ${byteArrayOutputStream.size()}")
-                    bitmap.compress(Bitmap.CompressFormat.JPEG, 10, byteArrayOutputStream)
-                    val byteArray: ByteArray = byteArrayOutputStream.toByteArray()
-                    Log.e(TAG, "Compressed Image Size ${byteArrayOutputStream.size()}")
+        Log.d(TAG, "File Length Before ${file.size}")
+        Log.d(TAG, "File size in KB Before ${file.sizeInKb}")
+        Log.d(TAG, "File size in MB Before ${file.sizeInMb}")
+        Coroutines.default {
+            when (file.sizeInMb >= 1.0) {
+                true -> {
+                    Log.d(TAG, "true file.sizeInMb >= 1.0")
+                    try {
+                        Log.d(TAG, "try")
+                        val bitmap: Bitmap = BitmapFactory.decodeFile(file.absolutePath)
+                        val byteArrayOutputStream: ByteArrayOutputStream = ByteArrayOutputStream()
+                        Log.d(TAG, "Compressing Image Size ${byteArrayOutputStream.size()}")
+                        bitmap.compress(Bitmap.CompressFormat.JPEG, 10, byteArrayOutputStream)
+                        val byteArray: ByteArray = byteArrayOutputStream.toByteArray()
+                        Log.d(TAG, "Compressed Image Size ${byteArrayOutputStream.size()}")
 
-                    val fileOutputStream: FileOutputStream
-                    fileOutputStream = FileOutputStream(file.absolutePath)
-                    fileOutputStream.write(byteArray)
-                    fileOutputStream.flush() //to avoid out of memory error
-                    fileOutputStream.close()
+                        val fileOutputStream: FileOutputStream
+                        fileOutputStream = FileOutputStream(file.absolutePath)
+                        fileOutputStream.write(byteArray)
+                        fileOutputStream.flush() //to avoid out of memory error
+                        fileOutputStream.close()
 
-                    Log.e(TAG, "File Length After ${file.size}")
-                    Log.e(TAG, "File size in KB After ${file.sizeInKb}")
-                    Log.e(TAG, "File size in MB After ${file.sizeInMb}")
-                } catch (ex: IOException) {
-                    ex.printStackTrace()
-                    Log.e(TAG, "compressImage IOException : ${ex.message}")
+                        Log.d(TAG, "File Length After ${file.size}")
+                        Log.d(TAG, "File size in KB After ${file.sizeInKb}")
+                        Log.d(TAG, "File size in MB After ${file.sizeInMb}")
+                    } catch (ex: IOException) {
+                        ex.printStackTrace()
+                        Log.e(TAG, "compressImage IOException : ${ex.message}")
+                    }
+                }
+                false -> {
+                    Log.d(TAG, "false file.sizeInMb >= 1.0")
                 }
             }
-            false -> {
-                Log.e(TAG, "false file.sizeInMb >= 1.0")
-            }
+        }
+    }
+
+    private fun downloadImage() {
+        Log.d(TAG, "downloadImage()")
+        Coroutines.io {
+
         }
     }
     //endregion
@@ -446,10 +463,10 @@ class OptionBottomSheetViewModel : AndroidViewModel {
                 //Camera
                 Log.d(TAG,"CAMERA_MEDIA_REQUEST_CODE")
                 currentImageUri = null
-                Log.e(TAG,"File - ${File(currentImagePath)}")
-                Log.e(TAG,"File Length ${File(currentImagePath).size}")
-                Log.e(TAG,"File size in KB ${File(currentImagePath).sizeInKb}")
-                Log.e(TAG,"File size in MB ${File(currentImagePath).sizeInMb}")
+                Log.d(TAG,"File - ${File(currentImagePath)}")
+                Log.d(TAG,"File Length ${File(currentImagePath).size}")
+                Log.d(TAG,"File size in KB ${File(currentImagePath).sizeInKb}")
+                Log.d(TAG,"File size in MB ${File(currentImagePath).sizeInMb}")
                 liveMediaPath.setValue(
                     currentImagePath
                 )
@@ -459,10 +476,10 @@ class OptionBottomSheetViewModel : AndroidViewModel {
                 Log.d(TAG,"GALLERY_MEDIA_REQUEST_CODE")
                 currentImagePath = getPathFromURI(data?.getData()!!)
                 currentImageUri = data?.getData()
-                Log.e(TAG,"File - ${File(getPathFromURI(currentImageUri!!))}")
-                Log.e(TAG,"File Length ${File(getPathFromURI(currentImageUri!!)).size}")
-                Log.e(TAG,"File size in KB ${File(getPathFromURI(currentImageUri!!)).sizeInKb}")
-                Log.e(TAG,"File size in MB ${File(currentImagePath).sizeInMb}")
+                Log.d(TAG,"File - ${File(getPathFromURI(currentImageUri!!))}")
+                Log.d(TAG,"File Length ${File(getPathFromURI(currentImageUri!!)).size}")
+                Log.d(TAG,"File size in KB ${File(getPathFromURI(currentImageUri!!)).sizeInKb}")
+                Log.d(TAG,"File size in MB ${File(currentImagePath).sizeInMb}")
                 liveMediaPath.setValue(
                     currentImagePath
                 )
@@ -471,8 +488,8 @@ class OptionBottomSheetViewModel : AndroidViewModel {
                 //Crop Image
                 Log.d(TAG,"CROP_IMAGE_ACTIVITY_REQUEST_CODE")
                 val result : CropImage.ActivityResult = CropImage.getActivityResult(data)
-                Log.e(TAG,"uri path - ${getPathFromURI(result.uri)}")
-                Log.e(TAG,"File - ${File(getPathFromURI(result.uri))}")
+                Log.d(TAG,"uri path - ${getPathFromURI(result.uri)}")
+                Log.d(TAG,"File - ${File(getPathFromURI(result.uri))}")
                 compressImageToOneMB(
                     File(getPathFromURI(result.uri))
                 )

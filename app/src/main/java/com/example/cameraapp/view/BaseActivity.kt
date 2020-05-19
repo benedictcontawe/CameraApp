@@ -1,10 +1,11 @@
-package com.example.cameraapp
+package com.example.cameraapp.view
 
 import android.os.Bundle
 import android.os.PersistableBundle
 import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.example.cameraapp.util.ManifestPermission
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 
 abstract class BaseActivity : AppCompatActivity() {

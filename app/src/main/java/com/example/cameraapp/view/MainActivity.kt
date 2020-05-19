@@ -1,4 +1,4 @@
-package com.example.cameraapp
+package com.example.cameraapp.view
 
 import android.os.Bundle
 import android.view.View
@@ -10,6 +10,8 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
+import com.example.cameraapp.OptionBottomSheetViewModel
+import com.example.cameraapp.R
 import com.google.common.util.concurrent.ListenableFuture
 import kotlinx.android.synthetic.main.activity_main.*
 //import androidx.camera.core.PreviewConfig

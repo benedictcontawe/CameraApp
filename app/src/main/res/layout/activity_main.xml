@@ -6,7 +6,7 @@
     android:background="@android:color/white"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    tools:context=".view.MainActivity">
     <!--region Guide lines-->
     <!--region Vertical Guide lines-->
     <androidx.constraintlayout.widget.Guideline
