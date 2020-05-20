@@ -52,4 +52,23 @@
         app:layout_constraintEnd_toEndOf="@id/constraint_guideline_vertical_trailing"
         app:layout_constraintBottom_toBottomOf="@id/constraint_guideline_horizontal_bottom"/>
 
+    <EditText
+        android:id="@+id/edit_text_download"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:hint="Download Image URL"
+        app:layout_constraintStart_toStartOf="@id/constraint_guideline_vertical_leading"
+        app:layout_constraintEnd_toEndOf="@id/constraint_guideline_vertical_trailing"
+        app:layout_constraintBottom_toTopOf="@id/button_download" />
+
+    <Button
+        android:id="@+id/button_download"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Download"
+        app:layout_constraintStart_toStartOf="@id/constraint_guideline_vertical_leading"
+        app:layout_constraintEnd_toEndOf="@id/constraint_guideline_vertical_trailing"
+        app:layout_constraintBottom_toBottomOf="@id/constraint_guideline_horizontal_bottom" />
+
+
 </androidx.constraintlayout.widget.ConstraintLayout>

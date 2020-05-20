@@ -25,6 +25,7 @@ class MainActivity : BaseActivity(), View.OnClickListener {
         setContentView(R.layout.activity_main)
         initiateCameraX()
         image_view.setOnClickListener(this)
+        button_download.setOnClickListener(this)
         optionBottomSheetViewModel = ViewModelProvider(this).get(OptionBottomSheetViewModel::class.java)
         optionBottomSheetViewModel.observePhotoPath().observe(this, Observer { imagePath ->
             when {
@@ -58,6 +59,10 @@ class MainActivity : BaseActivity(), View.OnClickListener {
                         OptionBottomSheetDialogFragment.newInstance()
                     )
                 }
+            }
+            button_download -> {
+                //optionBottomSheetViewModel.downloadImage("http://213.212.61.24:9090/i/u/11jmbds5.jpg?fd57ed1113d02359df53c61c0a4726d53bcd2952")
+                optionBottomSheetViewModel.downloadImage(edit_text_download.getText().toString())
             }
         }
     }

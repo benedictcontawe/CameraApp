@@ -26,10 +26,9 @@ import com.example.cameraapp.util.Coroutines
 import com.example.cameraapp.util.ManifestPermission
 import com.example.cameraapp.view.OptionBottomSheetDialogFragment
 import com.theartofdev.edmodo.cropper.CropImage
-import java.io.ByteArrayOutputStream
-import java.io.File
-import java.io.FileOutputStream
-import java.io.IOException
+import kotlinx.coroutines.delay
+import java.io.*
+import java.net.URL
 
 class OptionBottomSheetViewModel : AndroidViewModel {
 
@@ -373,7 +372,7 @@ class OptionBottomSheetViewModel : AndroidViewModel {
         liveMediaPath.setValue("")
     }
     //endregion
-    //region Compress Image
+    //region Heavy Computation for Compress and Download Image
     private fun compressImage(file : File) {
         Log.d(TAG, "compressImage($file)")
         Log.d(TAG,"File Length Before ${file.size}")
@@ -416,14 +415,14 @@ class OptionBottomSheetViewModel : AndroidViewModel {
                     Log.d(TAG, "true file.sizeInMb >= 1.0")
                     try {
                         Log.d(TAG, "try")
-                        val bitmap: Bitmap = BitmapFactory.decodeFile(file.absolutePath)
-                        val byteArrayOutputStream: ByteArrayOutputStream = ByteArrayOutputStream()
+                        val bitmap : Bitmap = BitmapFactory.decodeFile(file.absolutePath)
+                        val byteArrayOutputStream : ByteArrayOutputStream = ByteArrayOutputStream()
                         Log.d(TAG, "Compressing Image Size ${byteArrayOutputStream.size()}")
                         bitmap.compress(Bitmap.CompressFormat.JPEG, 10, byteArrayOutputStream)
                         val byteArray: ByteArray = byteArrayOutputStream.toByteArray()
                         Log.d(TAG, "Compressed Image Size ${byteArrayOutputStream.size()}")
 
-                        val fileOutputStream: FileOutputStream
+                        val fileOutputStream : FileOutputStream
                         fileOutputStream = FileOutputStream(file.absolutePath)
                         fileOutputStream.write(byteArray)
                         fileOutputStream.flush() //to avoid out of memory error
@@ -444,10 +443,28 @@ class OptionBottomSheetViewModel : AndroidViewModel {
         }
     }
 
-    private fun downloadImage() {
+    public fun downloadImage(imageURL : String) {
         Log.d(TAG, "downloadImage()")
-        Coroutines.io {
+        Coroutines.default {
+            try {
+                // Download Image from URL
+                val inputStream : InputStream = URL(imageURL).openStream()
+                // Decode Bitmap
+                val bitmap : Bitmap = BitmapFactory.decodeStream(inputStream)
 
+                val fileOutputStream : FileOutputStream
+                fileOutputStream = FileOutputStream(getImageFile())
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 10, fileOutputStream)
+                fileOutputStream.flush() //to avoid out of memory error
+                fileOutputStream.close()
+                Log.d(TAG, "done")
+                liveMediaPath.postValue(
+                    currentImagePath
+                )
+            } catch (ex : Exception) {
+                Log.e(TAG, "downloadImage Exception : ${ex.message}")
+                ex.printStackTrace()
+            }
         }
     }
     //endregion
