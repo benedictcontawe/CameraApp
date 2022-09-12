@@ -1,75 +1,77 @@
 package com.example.cameraapp
 
+import android.os.Build
 import android.os.Bundle
 import android.view.View
+import androidx.annotation.RequiresApi
 import androidx.camera.core.CameraSelector
+import androidx.camera.core.ImageCapture
 import androidx.camera.lifecycle.ProcessCameraProvider
-import androidx.core.content.ContextCompat
-import androidx.lifecycle.Observer
+import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
-import com.google.common.util.concurrent.ListenableFuture
-import kotlinx.android.synthetic.main.activity_main.*
-//import androidx.camera.core.PreviewConfig
+import com.example.cameraapp.databinding.MainBinder
+import kotlinx.coroutines.CoroutineScope
 
-class MainActivity : BaseActivity(), View.OnClickListener {
+public class MainActivity : BaseActivity(), View.OnClickListener {
 
-    private lateinit var optionBottomSheetViewModel : OptionBottomSheetViewModel
+    companion object {
+        private val TAG = MainActivity::class.java.getSimpleName()
+        @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
+        private val CAMERA_REAR = CameraSelector.DEFAULT_BACK_CAMERA
+    }
 
-    override fun onCreate(savedInstanceState : Bundle?) {
+    private var binder : MainBinder? = null
+    private val viewModel : OptionBottomSheetViewModel by lazy { ViewModelProvider(this@MainActivity).get(OptionBottomSheetViewModel::class.java) }
+    private val imageCapture : ImageCapture by lazy { ImageCapture.Builder().build() }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        binder = DataBindingUtil.setContentView(this@MainActivity, R.layout.activity_main)
+        binder?.setLifecycleOwner(this@MainActivity)
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-        initiateCameraX()
-        image_view.setOnClickListener(this)
-        optionBottomSheetViewModel = ViewModelProvider(this).get(OptionBottomSheetViewModel::class.java)
-        optionBottomSheetViewModel.observePhotoUri().observe(this, Observer { imageUri ->
-            when {
-                imageUri != null -> {
-                    image_view.setImageURI(imageUri)
-                }
-                else -> {
-                    image_view.setImageResource(R.mipmap.ic_launcher)
-                }
+    }
+
+    override suspend fun onSetObservers(scope : CoroutineScope) {
+        binder?.imageView?.setOnClickListener(this@MainActivity)
+    }
+
+    override fun onClick(view : View?) {
+        if (view == binder?.imageView && viewModel.isShowed()?.not() == true)
+            showBottomSheetFragment( OptionBottomSheetDialogFragment.newInstance() )
+    }
+
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
+    private fun startCamera() {
+        val cameraProviderFuture = ProcessCameraProvider.getInstance(this@MainActivity)
+        /*cameraProviderFuture.addListener({
+            val preview = Preview.Builder().build()
+            preview.setSurfaceProvider(binder?.previewView?.getSurfaceProvider())
+            try {
+
+            } catch (e : Exception) {
+
             }
-        })
+        })*/
     }
 
-    override fun onClick(view : View) {
-        when(view) {
-            image_view -> {
-                if (!optionBottomSheetViewModel.isShowed()) {
-                    showBottomSheetFragment(
-                        OptionBottomSheetDialogFragment.newInstance()
-                    )
-                }
-            }
-        }
-    }
-    //region Camera X Methods
-    private lateinit var cameraProviderFuture : ListenableFuture<ProcessCameraProvider>
-    private fun initiateCameraX() {
-        cameraProviderFuture = ProcessCameraProvider.getInstance(this)
+    override fun onResume() {
+        super.onResume()
     }
 
-    private fun startCameraX() {
-        val cameraSelector : CameraSelector = CameraSelector.Builder().requireLensFacing(CameraSelector.LENS_FACING_BACK).build()
-        cameraProviderFuture.addListener(Runnable {
-            val cameraProvider : ProcessCameraProvider = cameraProviderFuture.get()
-            cameraProvider.bindToLifecycle(this, cameraSelector)
-        }, ContextCompat.getMainExecutor(this))
 
-        //view_camera.bindToLifecycle(this)
-        //view_camera.takePicture(getImageFile(),object : ImageCapture.OnImageCapturedCallback)
-
-        //CameraX.unbindAll()
-
-        //val preview = createPreviewUseCase()
+    override fun onPause() {
+        super.onPause()
+    }
+    /*
+    override fun onRequestPermissionsResult(requestCode : Int, permissions : Array<String>, grantResults : IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        Log.e(TAG,"requestCode - $requestCode")
+        Log.e(TAG,"resultCode - $resultCode")
+        Log.e(TAG,"data - $data")
+        viewModel.checkActivityResult(requestCode,resultCode,data)
     }
 
-    private fun updateTransform() {
-
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
     }
-    //endregion
-    override fun grantedCode(requestCode: Int) {
-        optionBottomSheetViewModel.setGrantedRequestCode(requestCode)
-    }
+    */
 }

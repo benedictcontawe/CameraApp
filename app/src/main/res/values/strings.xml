@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">CameraApp</string>
+    <string name="camera_x">Camera X</string>
+    <string name="cancel">Cancel</string>
+    <string name="choose_photo">Choose Photo</string>
+    <string name="delete_photo">Delete Photo</string>
+    <string name="edit_photo">Edit Photo</string>
+    <string name="take_photo">Take Photo</string>
 </resources>

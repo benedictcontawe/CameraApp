@@ -1,8 +1,6 @@
 package com.example.cameraapp
 
-import android.app.Activity
 import android.app.Application
-import android.content.Intent
 import android.database.Cursor
 import android.net.Uri
 import android.os.Build
@@ -16,17 +14,16 @@ import androidx.lifecycle.MutableLiveData
 import java.io.File
 import java.util.*
 
-
 class OptionBottomSheetViewModel : AndroidViewModel {
 
     companion object {
-        private val TAG = OptionBottomSheetViewModel::class.java.simpleName
+        private val TAG = OptionBottomSheetViewModel::class.java.getSimpleName()
     }
 
     private var isActive : Boolean = false
     private var currentImagePath : String? = null
     private val liveMediaPermission : MutableLiveData<Int> = MutableLiveData()
-    private val liveMediaUri : MutableLiveData<Uri> = MutableLiveData()
+    private val liveMediaUri : MutableLiveData<Uri?> = MutableLiveData()
     private val liveFilePath : MutableLiveData<String> = MutableLiveData()
 
     constructor(application: Application) : super(application) {
@@ -60,7 +57,7 @@ class OptionBottomSheetViewModel : AndroidViewModel {
     fun observeGrantedRequestCode() : LiveData<Int> = liveMediaPermission
     //endregion
     //region Photo Uri
-    public fun observePhotoUri() : LiveData<Uri> = liveMediaUri
+    public fun observePhotoUri() : MutableLiveData<Uri?> = liveMediaUri
     public fun observePhotoPath() : LiveData<String> = liveFilePath
     //endregion
     fun createCameraPictureFile() : Uri {
@@ -130,7 +127,7 @@ class OptionBottomSheetViewModel : AndroidViewModel {
         }
     }
 
-    fun checkActivityResult(requestCode : Int, resultCode : Int, data : Intent?) {
+    /*fun checkActivityResult(requestCode : Int, resultCode : Int, data : Intent?) {
         Log.d(TAG,"checkActivityResult($requestCode,$resultCode,$data)")
         when {
             requestCode == OptionBottomSheetDialogFragment.CAMERA_MEDIA_CODE && resultCode == Activity.RESULT_OK -> {
@@ -157,5 +154,5 @@ class OptionBottomSheetViewModel : AndroidViewModel {
 
             }
         }
-    }
+    }*/
 }
