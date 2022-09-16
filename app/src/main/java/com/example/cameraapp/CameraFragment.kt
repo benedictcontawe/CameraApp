@@ -81,17 +81,17 @@ class CameraFragment : BaseFragment() {
         //cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, viewModel?.createCameraPictureFile())
         //startActivityForResult(cameraIntent, CAMERA_MEDIA_CODE)
     }
-
+    /*
     private fun takePhoto() {
         // Get a stable reference of the modifiable image capture use case
 
         // Create time-stamped output file to hold the image
-        /*val photoFile = File(
+        val photoFile = File(
             outputDirectory,
             SimpleDateFormat(
                 FILENAME_FORMAT, Locale.US
             ).format(System.currentTimeMillis()) + ".jpg"
-        )*/
+        )
 
         // Create output options object which contains file + metadata
         val outputOptions = ImageCapture.OutputFileOptions.Builder(photoFile).build()
@@ -113,7 +113,7 @@ class CameraFragment : BaseFragment() {
                 }
             })
     }
-
+    */
     /*private fun bindCameraUseCases() {
         // Make sure that there are no other use cases bound to CameraX
         CameraX.unbindAll()
