@@ -1,6 +1,8 @@
 package com.example.cameraapp
 
+import android.content.Intent
 import android.os.Bundle
+import android.provider.MediaStore
 import android.view.View
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
@@ -41,6 +43,9 @@ public class MainActivity : BaseActivity(), View.OnClickListener, MainListener {
     }
 
     override fun launchCamera() {
+        //val cameraIntent : Intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+        //cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, viewModel.createCameraPictureFile())
+        //startActivityForResult(cameraIntent, ManifestPermission.CAMERA_PERMISSION_CODE)
         addToBackStackFragment(R.id.frame_layout, CameraFragment.newInstance())
     }
 

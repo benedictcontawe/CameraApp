@@ -15,7 +15,6 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import java.io.File
-import java.util.*
 
 class OptionBottomSheetViewModel : AndroidViewModel {
 
@@ -29,7 +28,7 @@ class OptionBottomSheetViewModel : AndroidViewModel {
     private val liveMediaUri : MutableLiveData<Uri?> = MutableLiveData()
     private val liveFilePath : MutableLiveData<String> = MutableLiveData()
 
-    constructor(application: Application) : super(application) {
+    constructor(application : Application) : super(application) {
         liveMediaPermission = MutableSharedFlow()
     }
     //region Life Cycle Aware Methods
@@ -65,34 +64,49 @@ class OptionBottomSheetViewModel : AndroidViewModel {
         val authority : String = "$packageName.fileprovider"
         return when {
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.N -> {
-                FileProvider.getUriForFile(getApplication(), authority, getImageFile())
+                FileProvider.getUriForFile(getApplication(), authority, getCacheFile())
             }
             else -> {
-                Uri.fromFile(getImageFile())
+                Uri.fromFile(getCacheFile())
             }
         }
     }
 
-    private fun getImageFile() : File {
+    public fun getFile() : File {
+        val dir : File =
+            if (isExternalStorageWritable().not()) getApplication<Application>().getFilesDir()
+            else getApplication<Application>().getExternalFilesDir(Environment.DIRECTORY_PICTURES)!!
+
+        val filePathFolder : File = File(dir,"CameraX")
+        if (!filePathFolder.exists()) filePathFolder.mkdirs()
+
+        val fileName : String = "${System.currentTimeMillis()}_cameraXSample"
+
+        val fileValue : File
+        fileValue = File.createTempFile(fileName,".JPG", filePathFolder)
+
+        currentImagePath = "file:" + fileValue.getAbsolutePath()
+        return fileValue
+    }
+
+    public fun getCacheFile() : File {
         // This PC\Galaxy J4+\Phone\Android\data\com.example.cameraapp\cache\CameraX
         val cacheDir : File =
             if (isExternalStorageWritable().not()) getApplication<Application>().getCacheDir()
             else getApplication<Application>().getExternalCacheDir()!!
 
-        val filePath : File
-        filePath = File(cacheDir,"CameraX")
-        //filePath = Environment.getExternalStorageDirectory().getPath()
-        if (!filePath.exists()) {
-            filePath.mkdirs()
-        }
+        val filePathFolder : File = File(cacheDir,"CameraX")
+        //filePathFolder = Environment.getExternalStorageDirectory().getPath()
+        if (!filePathFolder.exists()) filePathFolder.mkdirs()
 
-        var fileName : String
+        val fileName : String
         //fileName = "${UUID.randomUUID()}_cameraXSample.jpg"
-        fileName = "${UUID.randomUUID()}_cameraXSample"
+        //fileName = "${UUID.randomUUID()}_cameraXSample"
+        fileName = "${System.currentTimeMillis()}_cameraXSample"
 
-        var fileValue : File
-        fileValue = File(filePath,fileName)
-        fileValue = File.createTempFile(fileName,".JPG",filePath)
+        val fileValue : File
+        //fileValue = File(filePath,fileName)
+        fileValue = File.createTempFile(fileName,".JPG", filePathFolder)
 
         currentImagePath = "file:" + fileValue.getAbsolutePath()
         return fileValue
@@ -110,13 +124,12 @@ class OptionBottomSheetViewModel : AndroidViewModel {
     private fun getRealPathFromURI(contentUri : Uri) : String? {
         var cursor : Cursor? = null
         return try {
-            val proj =
-                arrayOf(MediaStore.Images.Media.DATA)
+            val proj = arrayOf(MediaStore.Images.Media.DATA)
             cursor = getApplication<Application>().getContentResolver().query(contentUri, proj, null, null, null)
             val column_index: Int = cursor!!.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)
-            cursor?.moveToFirst()
-            cursor?.getString(column_index)
-        } catch (e: Exception) {
+            cursor.moveToFirst()
+            cursor.getString(column_index)
+        } catch (e : Exception) {
             Log.e(TAG, "getRealPathFromURI Exception : $e")
             ""
         } finally {

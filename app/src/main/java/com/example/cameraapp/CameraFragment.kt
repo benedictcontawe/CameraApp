@@ -7,7 +7,6 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import androidx.camera.core.*
-import androidx.camera.core.impl.PreviewConfig
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
@@ -38,7 +37,7 @@ class CameraFragment : BaseFragment() {
         return binder?.root ?: super.onCreateView(inflater, container, savedInstanceState)
     }
 
-    override suspend fun onSetObservers(scope: CoroutineScope) {
+    override suspend fun onSetObservers(scope : CoroutineScope) {
         startCamera()
         binder?.buttonShutterCapture?.setOnTouchListener(this@CameraFragment)
         binder?.buttonLensFlip?.setOnTouchListener(this@CameraFragment)
@@ -46,7 +45,7 @@ class CameraFragment : BaseFragment() {
 
     override fun onTouchFragment(view : View, event : MotionEvent) : Boolean {
         return if(isActionUp && isInsideBounds(view) && view == binder?.buttonShutterCapture) {
-            showToast("Shutter Capture")
+            takePhoto()
             true
         } else if (isActionUp && isInsideBounds(view) && view == binder?.buttonLensFlip) {
             flipCamera()
@@ -65,36 +64,29 @@ class CameraFragment : BaseFragment() {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(requireContext())
         val cameraProvider : ProcessCameraProvider = cameraProviderFuture.get()
         val preview = Preview.Builder().build()
-        cameraProviderFuture.addListener({
-            try {
-                preview.setSurfaceProvider(binder?.previewView?.getSurfaceProvider())
-                cameraProvider.unbindAll()
-                cameraProvider.bindToLifecycle(this@CameraFragment, cameraSelector, preview)
-            } catch (e : ExecutionException) {
-                logError(TAG, e.message, e)
-            } catch (e : InterruptedException) {
-                e.printStackTrace();
-            }
-        }, ContextCompat.getMainExecutor(requireContext())
+        cameraProviderFuture.addListener(
+            {
+                try {
+                    preview.setSurfaceProvider(binder?.previewView?.getSurfaceProvider())
+                    cameraProvider.unbindAll()
+                    cameraProvider.bindToLifecycle(binder?.getLifecycleOwner()!!, cameraSelector, preview, imageCapture)
+                } catch (e : ExecutionException) {
+                    logError(TAG, e.message, e)
+                } catch (e : InterruptedException) {
+                    e.printStackTrace();
+                }
+            }, ContextCompat.getMainExecutor(requireContext())
         )
-        //val cameraIntent : Intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-        //cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, viewModel?.createCameraPictureFile())
-        //startActivityForResult(cameraIntent, CAMERA_MEDIA_CODE)
     }
-    /*
+
     private fun takePhoto() {
         // Get a stable reference of the modifiable image capture use case
 
         // Create time-stamped output file to hold the image
-        val photoFile = File(
-            outputDirectory,
-            SimpleDateFormat(
-                FILENAME_FORMAT, Locale.US
-            ).format(System.currentTimeMillis()) + ".jpg"
-        )
+        val photoFile = binder?.getViewModel()?.getCacheFile()
 
         // Create output options object which contains file + metadata
-        val outputOptions = ImageCapture.OutputFileOptions.Builder(photoFile).build()
+        val outputOptions = ImageCapture.OutputFileOptions.Builder(photoFile!!).build()
 
         // Set up image capture listener, which is triggered after photo has
         // been taken
@@ -113,22 +105,4 @@ class CameraFragment : BaseFragment() {
                 }
             })
     }
-    */
-    /*private fun bindCameraUseCases() {
-        // Make sure that there are no other use cases bound to CameraX
-        CameraX.unbindAll()
-
-        val previewConfig = PreviewConfig.Builder().apply {
-            setLensFacing(lensFacing)
-        }.build()
-        val preview = Preview(previewConfig)
-
-        val imageCaptureConfig = ImageCaptureConfig.Builder().apply {
-            setLensFacing(lensFacing)
-        }.build()
-        imageCapture = ImageCapture(imageCaptureConfig)
-
-        // Apply declared configs to CameraX using the same lifecycle owner
-        CameraX.bindToLifecycle(this, preview, imageCapture)
-    }*/
 }
