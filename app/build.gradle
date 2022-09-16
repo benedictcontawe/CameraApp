@@ -34,7 +34,7 @@ android {
 
 dependencies {
     //region Android X Google Library
-    implementation 'androidx.core:core-ktx:1.8.0'
+    implementation 'androidx.core:core-ktx:1.9.0'
     implementation 'androidx.appcompat:appcompat:1.5.0'
     implementation 'com.google.android.material:material:1.6.1'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
@@ -53,10 +53,11 @@ dependencies {
     //annotationProcessor 'com.github.bumptech.glide:compiler:4.9.0'
     //endregion
     //region CameraX Library
-    implementation "androidx.camera:camera-core:1.1.0"
     implementation "androidx.camera:camera-camera2:1.1.0"
-    implementation "androidx.camera:camera-lifecycle:1.1.0"
-    implementation "androidx.camera:camera-view:1.1.0"
+    implementation "androidx.camera:camera-core:1.1.0"
     implementation "androidx.camera:camera-extensions:1.1.0"
+    implementation "androidx.camera:camera-lifecycle:1.1.0"
+    implementation "androidx.camera:camera-video:1.1.0"
+    implementation "androidx.camera:camera-view:1.1.0"
     //endregion
 }

@@ -26,11 +26,19 @@ abstract public class BaseFragment : Fragment(), View.OnTouchListener {
     }
 
     private var inputMethodManager : InputMethodManager? = null
-
+    //region Log Methods
     protected fun logDebug(TAG : String, message : String) {
-        Log.d(TAG,message)
+        Log.d(TAG, message)
     }
 
+    protected fun logError(TAG : String, message : String?) {
+        Log.e(TAG, message ?: Constants.NIL)
+    }
+
+    protected fun logError(TAG : String, message : String?, throwable : Throwable) {
+        Log.e(TAG, message ?: Constants.NIL, throwable)
+    }
+    //endregion
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         inputMethodManager = getInputMethodManager()
@@ -54,7 +62,7 @@ abstract public class BaseFragment : Fragment(), View.OnTouchListener {
     protected fun getColor(id : Int) : Int {
         return ContextCompat.getColor(requireContext(), id)
     }
-
+    //region Get String Methods
     protected fun getString(id : Int, value : String?) : String {
         return String.format(requireContext().getResources().getString(id, value))
     }
@@ -62,6 +70,7 @@ abstract public class BaseFragment : Fragment(), View.OnTouchListener {
     protected fun getString(id : Int, value : Int) : String {
         return String.format(requireContext().getResources().getString(id, getString(value)))
     }
+    //endregion
     //region Soft Keyboard Methods
     protected fun getInputMethodManager() : InputMethodManager { logDebug(TAG,"getInputMethodManager()")
         return requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager

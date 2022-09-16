@@ -3,10 +3,15 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     tools:context=".MainActivity" >
-    <data class="MainBinder" />
+    <data class="MainBinder"  >
+        <variable
+            name="viewModel"
+            type="com.example.cameraapp.OptionBottomSheetViewModel" />
+    </data>
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:animateLayoutChanges="true"
         android:background="@android:color/white" >
     <!--region Guide lines-->
     <!--region Vertical Guide lines-->
@@ -51,5 +56,14 @@
             app:layout_constraintStart_toStartOf="@id/constraint_guideline_vertical_leading"
             app:layout_constraintEnd_toEndOf="@id/constraint_guideline_vertical_trailing"
             app:layout_constraintBottom_toBottomOf="@id/constraint_guideline_horizontal_bottom" />
+
+        <FrameLayout
+            android:id="@+id/frame_layout"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

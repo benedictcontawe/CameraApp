@@ -1,6 +1,10 @@
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto" >
-    <data class="OptionBinder" />
+    <data class="OptionBinder" >
+        <variable
+            name="viewModel"
+            type="com.example.cameraapp.OptionBottomSheetViewModel" />
+    </data>
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -25,7 +29,7 @@
         <!--endregion-->
         <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/tv_bottom_sheet_heading"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/camera_x"
             android:textAppearance="@style/TextAppearance.AppCompat.Title"
@@ -33,8 +37,8 @@
             app:layout_constraintStart_toStartOf="@id/constraint_guideline_vertical_leading"
             app:layout_constraintEnd_toEndOf="@id/constraint_guideline_vertical_trailing" />
 
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/text_view_take_photo"
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/button_take_photo"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="@string/take_photo"
@@ -44,36 +48,36 @@
             app:layout_constraintStart_toStartOf="@id/constraint_guideline_vertical_leading"
             app:layout_constraintEnd_toEndOf="@id/constraint_guideline_vertical_trailing" />
 
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/text_view_choose_photo"
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/button_choose_photo"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="@string/choose_photo"
             android:textColor="@color/dark_blue"
             android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
-            app:layout_constraintTop_toBottomOf="@id/text_view_take_photo"
+            app:layout_constraintTop_toBottomOf="@id/button_take_photo"
             app:layout_constraintStart_toStartOf="@id/constraint_guideline_vertical_leading"
             app:layout_constraintEnd_toEndOf="@id/constraint_guideline_vertical_trailing" />
 
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/text_view_edit_photo"
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/button_edit_photo"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="@string/edit_photo"
             android:textColor="@color/dark_blue"
             android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
-            app:layout_constraintTop_toBottomOf="@id/text_view_choose_photo"
+            app:layout_constraintTop_toBottomOf="@id/button_choose_photo"
             app:layout_constraintStart_toStartOf="@id/constraint_guideline_vertical_leading"
             app:layout_constraintEnd_toEndOf="@id/constraint_guideline_vertical_trailing" />
 
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/text_view_delete_photo"
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/button_delete_photo"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="@string/delete_photo"
             android:textColor="@color/dark_blue"
             android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
-            app:layout_constraintTop_toBottomOf="@id/text_view_edit_photo"
+            app:layout_constraintTop_toBottomOf="@id/button_edit_photo"
             app:layout_constraintStart_toStartOf="@id/constraint_guideline_vertical_leading"
             app:layout_constraintEnd_toEndOf="@id/constraint_guideline_vertical_trailing" />
 
@@ -82,16 +86,16 @@
             android:layout_width="0dp"
             android:layout_height="1dp"
             android:background="@android:color/darker_gray"
-            app:layout_constraintTop_toBottomOf="@id/text_view_delete_photo"
+            app:layout_constraintTop_toBottomOf="@id/button_delete_photo"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
 
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/text_view_cancel"
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/button_cancel"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="@string/cancel"
-            android:textColor="@android:color/darker_gray"
+            android:textColor="@color/red"
             android:textAppearance="@style/TextAppearance.AppCompat.Medium"
             app:layout_constraintTop_toBottomOf="@id/view_divider"
             app:layout_constraintStart_toStartOf="@id/constraint_guideline_vertical_leading"

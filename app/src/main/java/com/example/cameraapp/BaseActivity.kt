@@ -103,8 +103,8 @@ abstract public class BaseActivity : AppCompatActivity() {
         ManifestPermission.checkPermissionsResult(this@BaseActivity, permissions, grantResults,
             isNeverAskAgain =  { onRequestPermissionsNeverAskAgain() },
             isDenied = { onRequestPermissionsDenied() },
-            isGranted = { onRequestPermissionsGranted()
-        } )
+            isGranted = { onRequestPermissionsGranted(requestCode) }
+        )
     }
 
     open fun onRequestPermissionsNeverAskAgain() {
@@ -115,8 +115,8 @@ abstract public class BaseActivity : AppCompatActivity() {
         logDebug(TAG, "onRequestPermissionsDenied()")
     }
 
-    open fun onRequestPermissionsGranted() {
-        logDebug(TAG, "onRequestPermissionsGranted()")
+    open fun onRequestPermissionsGranted(requestCode : Int) {
+        logDebug(TAG, "onRequestPermissionsGranted($requestCode)")
     }
     //endregion
     //region onBackPressed Methods

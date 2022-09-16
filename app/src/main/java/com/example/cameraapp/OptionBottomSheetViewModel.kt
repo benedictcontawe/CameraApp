@@ -11,6 +11,9 @@ import androidx.core.content.FileProvider
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import java.io.File
 import java.util.*
 
@@ -22,12 +25,12 @@ class OptionBottomSheetViewModel : AndroidViewModel {
 
     private var isActive : Boolean = false
     private var currentImagePath : String? = null
-    private val liveMediaPermission : MutableLiveData<Int> = MutableLiveData()
+    private val liveMediaPermission : MutableSharedFlow<Int>
     private val liveMediaUri : MutableLiveData<Uri?> = MutableLiveData()
     private val liveFilePath : MutableLiveData<String> = MutableLiveData()
 
     constructor(application: Application) : super(application) {
-
+        liveMediaPermission = MutableSharedFlow()
     }
     //region Life Cycle Aware Methods
     fun setResume() { Log.d(TAG,"setResume()")
@@ -41,27 +44,24 @@ class OptionBottomSheetViewModel : AndroidViewModel {
     fun isShowed() : Boolean = isActive
     //endregion
     //region Granted Request Code Methods
-    fun setGrantedRequestCode(grantedRequestCode : Int) {
-        Log.d(TAG,"setGrantedRequestCode($grantedRequestCode)")
-        when(grantedRequestCode) {
-            ManifestPermission.CAMERA_PERMISSION_CODE, ManifestPermission.GALLERY_PERMISSION_CODE -> {
-                liveMediaPermission.setValue(grantedRequestCode)
-            }
+    public fun checkRequestPermissionsResult(requestCode : Int) { Coroutines.io(this@OptionBottomSheetViewModel, {
+        if (requestCode == ManifestPermission.CAMERA_PERMISSION_CODE || requestCode == ManifestPermission.GALLERY_PERMISSION_CODE) {
+            liveMediaPermission.emit(requestCode)
         }
-    }
+    } ) }
 
-    fun acknowledgeGrantedRequestCode() {
-        liveMediaPermission.setValue(0)
-    }
+    fun acknowledgeGrantedRequestCode() { Coroutines.io(this@OptionBottomSheetViewModel, {
+        liveMediaPermission.emit(ManifestPermission.NIL_PERMISSION_CODE)
+    } ) }
 
-    fun observeGrantedRequestCode() : LiveData<Int> = liveMediaPermission
+    fun observeGrantedRequestCode() : SharedFlow<Int> = liveMediaPermission.asSharedFlow()
     //endregion
     //region Photo Uri
     public fun observePhotoUri() : MutableLiveData<Uri?> = liveMediaUri
     public fun observePhotoPath() : LiveData<String> = liveFilePath
     //endregion
     fun createCameraPictureFile() : Uri {
-        val packageName : String = getApplication<Application>().applicationContext.packageName
+        val packageName : String = getApplication<Application>().getApplicationContext().getPackageName()
         val authority : String = "$packageName.fileprovider"
         return when {
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.N -> {
@@ -75,12 +75,11 @@ class OptionBottomSheetViewModel : AndroidViewModel {
 
     private fun getImageFile() : File {
         // This PC\Galaxy J4+\Phone\Android\data\com.example.cameraapp\cache\CameraX
-        var cacheDir : File = getApplication<Application>().getCacheDir()
-        if (isExternalStorageWritable()) {
-            cacheDir = getApplication<Application>().getExternalCacheDir()!!
-        }
+        val cacheDir : File =
+            if (isExternalStorageWritable().not()) getApplication<Application>().getCacheDir()
+            else getApplication<Application>().getExternalCacheDir()!!
 
-        var filePath : File
+        val filePath : File
         filePath = File(cacheDir,"CameraX")
         //filePath = Environment.getExternalStorageDirectory().getPath()
         if (!filePath.exists()) {
@@ -95,7 +94,7 @@ class OptionBottomSheetViewModel : AndroidViewModel {
         fileValue = File(filePath,fileName)
         fileValue = File.createTempFile(fileName,".JPG",filePath)
 
-        currentImagePath = "file:" + fileValue.absolutePath
+        currentImagePath = "file:" + fileValue.getAbsolutePath()
         return fileValue
     }
 

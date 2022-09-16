@@ -6,127 +6,130 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.beep.trade.view.fragments.BaseBottomSheetDialogFragment
 import com.example.cameraapp.databinding.OptionBinder
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
-class OptionBottomSheetDialogFragment : BaseBottomSheetDialogFragment() {
-
-    private val mainActivity by lazy { activity as MainActivity }
-    private val viewModel : OptionBottomSheetViewModel by lazy { ViewModelProvider(requireActivity()).get(OptionBottomSheetViewModel::class.java) }
-    private var binder : OptionBinder? = null
+class OptionBottomSheetDialogFragment : BaseBottomSheetDialogFragment {
 
     companion object {
         private val TAG = OptionBottomSheetDialogFragment::class.java.getSimpleName()
 
-        fun newInstance() : OptionBottomSheetDialogFragment {
-            return OptionBottomSheetDialogFragment()
+        public fun newInstance(listener : MainListener) : OptionBottomSheetDialogFragment {
+            return OptionBottomSheetDialogFragment(listener)
         }
+    }
+
+    private var binder : OptionBinder? = null
+    private val viewModel : OptionBottomSheetViewModel by lazy { ViewModelProvider(requireActivity()).get(OptionBottomSheetViewModel::class.java) }
+    private var listener : MainListener? = null
+
+    constructor() {
+
+    }
+
+    constructor(listener : MainListener) {
+        this.listener = listener
+    }
+
+    override fun onCreate(savedInstanceState : Bundle?) {
+        super.onCreate(savedInstanceState)
+        setCancelable(true)
     }
 
     override fun onCreateView(inflater : LayoutInflater, container : ViewGroup?, savedInstanceState : Bundle?) : View? {
         binder = DataBindingUtil.inflate(inflater, R.layout.fragment_option, container, false)
+        binder?.setViewModel(viewModel)
         binder?.setLifecycleOwner(getViewLifecycleOwner())
         return binder?.root ?: super.onCreateView(inflater, container, savedInstanceState)
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        binder?.textViewTakePhoto?.setOnTouchListener(this@OptionBottomSheetDialogFragment)
-        binder?.textViewChoosePhoto?.setOnTouchListener(this@OptionBottomSheetDialogFragment)
-        binder?.textViewEditPhoto?.setOnTouchListener(this@OptionBottomSheetDialogFragment)
-        binder?.textViewDeletePhoto?.setOnTouchListener(this@OptionBottomSheetDialogFragment)
-        binder?.textViewCancel?.setOnTouchListener(this@OptionBottomSheetDialogFragment)
-    }
-
     override suspend fun onSetObservers(scope : CoroutineScope) {
-        viewModel?.observeGrantedRequestCode()?.observe(viewLifecycleOwner, Observer {
-                grantedCode -> when(grantedCode) {
-            ManifestPermission.CAMERA_PERMISSION_CODE -> {
-                launchCamera()
-                viewModel?.acknowledgeGrantedRequestCode()
+        binder?.buttonTakePhoto?.setOnTouchListener(this@OptionBottomSheetDialogFragment)
+        binder?.buttonChoosePhoto?.setOnTouchListener(this@OptionBottomSheetDialogFragment)
+        binder?.buttonEditPhoto?.setOnTouchListener(this@OptionBottomSheetDialogFragment)
+        binder?.buttonDeletePhoto?.setOnTouchListener(this@OptionBottomSheetDialogFragment)
+        binder?.buttonCancel?.setOnTouchListener(this@OptionBottomSheetDialogFragment)
+        scope.launch( block = { binder?.getViewModel()?.observeGrantedRequestCode()?.collectLatest( action = { grantedCode ->
+            if (grantedCode == ManifestPermission.CAMERA_PERMISSION_CODE) {
+                listener?.launchCamera()
+                dismissNow()
+                //binder?.getViewModel()?.acknowledgeGrantedRequestCode()
+            } else if (grantedCode == ManifestPermission.GALLERY_PERMISSION_CODE) {
+                listener?.launchGallery()
+                dismissNow()
+                //binder?.getViewModel()?.acknowledgeGrantedRequestCode()
             }
-            ManifestPermission.GALLERY_PERMISSION_CODE -> {
-                launchGallery()
-                viewModel?.acknowledgeGrantedRequestCode()
-            }
-        }
-        })
+        } ) } )
     }
 
-    override fun onTouchFragment(view: View, event: MotionEvent): Boolean {
-        return if (isActionUp && isInsideBounds(view) && view == binder?.textViewTakePhoto) {
+    override fun onTouchFragment(view : View, event : MotionEvent) : Boolean {
+        return if (isActionUp && isInsideBounds(view) && view == binder?.buttonTakePhoto) {
             onLaunchCamera()
             true
-        } else if (isActionUp && isInsideBounds(view) && view == binder?.textViewChoosePhoto) {
+        } else if (isActionUp && isInsideBounds(view) && view == binder?.buttonChoosePhoto) {
             onLaunchGallery()
             true
-        } else if (isActionUp && isInsideBounds(view) && view == binder?.textViewEditPhoto) {
+        } else if (isActionUp && isInsideBounds(view) && view == binder?.buttonEditPhoto) {
             launchEditPhoto()
             true
-        } else if (isActionUp && isInsideBounds(view) && view == binder?.textViewDeletePhoto) {
+        } else if (isActionUp && isInsideBounds(view) && view == binder?.buttonDeletePhoto) {
             //viewModel?.deletePhoto()
-            dismiss()
+            dismissNow()
             true
-        } else if (isActionUp && isInsideBounds(view) && view == binder?.textViewCancel) {
-            dismiss()
+        } else if (isActionUp && isInsideBounds(view) && view == binder?.buttonCancel) {
+            dismissNow()
             true
         } else super.onTouchFragment(view, event)
     }
 
     override fun onResume() {
         super.onResume()
-        viewModel?.setResume()
+        viewModel.setResume()
     }
 
     override fun onPause() {
-        viewModel?.setPause()
+        viewModel.setPause()
         super.onPause()
     }
 
     private fun onLaunchCamera() {
-        ManifestPermission.checkSelfPermission(mainActivity, ManifestPermission.cameraPermission,
-            isGranted = { launchCamera() },
-            isDenied = { ManifestPermission.requestPermissions(mainActivity,
-                ManifestPermission.cameraPermission,
-                ManifestPermission.CAMERA_PERMISSION_CODE) }
-        )
-    }
-
-    private fun onLaunchGallery() {
-        ManifestPermission.checkSelfPermission( mainActivity,ManifestPermission.galleryPermissions,
-            isGranted = { launchGallery() }, isDenied = {
-                ManifestPermission.requestPermissions(mainActivity,
-                    ManifestPermission.galleryPermissions,
-                    ManifestPermission.GALLERY_PERMISSION_CODE)
+        ManifestPermission.checkSelfPermission(
+            requireContext(), ManifestPermission.cameraPermission,
+            isGranted = {
+                this.listener?.launchCamera()
+                dismissNow()
+            }, isDenied = {
+                ManifestPermission.requestPermissions(
+                    requireActivity(),
+                    ManifestPermission.cameraPermission,
+                    ManifestPermission.CAMERA_PERMISSION_CODE
+                )
             }
         )
     }
 
-    private fun launchCamera() {
-        //val cameraIntent : Intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-        //cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, viewModel?.createCameraPictureFile())
-        //startActivityForResult(cameraIntent, CAMERA_MEDIA_CODE)
+    private fun onLaunchGallery() {
+        ManifestPermission.checkSelfPermission(
+                requireContext(), ManifestPermission.galleryPermissions,
+                isGranted = {
+                    this.listener?.launchGallery()
+                    dismissNow()
+                }, isDenied = {
+                    ManifestPermission.requestPermissions(
+                        requireActivity(),
+                        ManifestPermission.galleryPermissions,
+                        ManifestPermission.GALLERY_PERMISSION_CODE
+                )
+            }
+        )
     }
 
-    private fun launchGallery() {
-        //val galleryIntent : Intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
-        //startActivityForResult(galleryIntent, GALLERY_MEDIA_CODE)
-    }
-
-    public fun launchEditPhoto() {
-        //TODO: Use Camera X Feature
+    public fun launchEditPhoto() { //TODO: Use Camera X Feature
         //startActivityForResult(editIntent, CROP_MEDIA_CODE)
         //mainActivity.showToast("Edit Mode Under Construction")
     }
-
-    /*override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        Log.e(TAG,"requestCode - $requestCode")
-        Log.e(TAG,"resultCode - $resultCode")
-        Log.e(TAG,"data - $data")
-        viewModel?.checkActivityResult(requestCode,resultCode,data)
-    }*/
 }
