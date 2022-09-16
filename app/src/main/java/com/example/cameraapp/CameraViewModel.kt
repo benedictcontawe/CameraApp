@@ -17,7 +17,6 @@ class CameraViewModel : BaseAndroidViewModel {
     }
 
     private val audio : AudioManager
-
     private val vibrator : Vibrator
     private val vibratorManager : VibratorManager?
 
@@ -108,7 +107,5 @@ class CameraViewModel : BaseAndroidViewModel {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && isAllowed)
             vibrator.vibrate(VibrationEffect.createWaveform(Constants.VIBRATE_PATTERN,Constants.VIBRATE_ONCE))
         else if(isAllowed) vibrator.vibrate(Constants.VIBRATE_PATTERN,Constants.VIBRATE_ONCE)
-
     } ) }
-
 }

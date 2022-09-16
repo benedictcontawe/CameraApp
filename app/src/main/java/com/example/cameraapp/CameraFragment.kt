@@ -1,8 +1,5 @@
 package com.example.cameraapp
 
-import android.content.Context
-import android.content.Context.AUDIO_SERVICE
-import android.media.AudioManager
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.MotionEvent
@@ -11,13 +8,11 @@ import android.view.ViewGroup
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
-import androidx.core.content.ContextCompat.getSystemService
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import com.example.cameraapp.databinding.CameraBinder
 import kotlinx.coroutines.CoroutineScope
 import java.util.concurrent.ExecutionException
-
 
 class CameraFragment : BaseFragment() {
 
