@@ -5,7 +5,7 @@
     <data class="CameraBinder" >
         <variable
         name="viewModel"
-        type="com.example.cameraapp.OptionBottomSheetViewModel" />
+        type="com.example.cameraapp.CameraViewModel" />
     </data>
     <androidx.constraintlayout.widget.ConstraintLayout
         android:background="@android:color/darker_gray"

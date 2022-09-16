@@ -36,12 +36,12 @@ abstract public class BaseBottomSheetDialogFragment : BottomSheetDialogFragment(
         Log.d(TAG,message)
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
+    override fun onCreate(savedInstanceState : Bundle?) {
         super.onCreate(savedInstanceState)
         setStyle(BottomSheetDialogFragment.STYLE_NORMAL, R.style.BottomSheetDialogFragment);
     }
 
-    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+    override fun onCreateDialog(savedInstanceState : Bundle?) : Dialog {
         val dialog : Dialog = super.onCreateDialog(savedInstanceState)
         dialog.setOnShowListener(object : DialogInterface.OnShowListener {
             override fun onShow(dialog: DialogInterface?) {
@@ -55,7 +55,7 @@ abstract public class BaseBottomSheetDialogFragment : BottomSheetDialogFragment(
         return  dialog
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    override fun onViewCreated(view : View, savedInstanceState : Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         inputMethodManager = getInputMethodManager()
         Coroutines.main(this@BaseBottomSheetDialogFragment, { onSetObservers(it) })

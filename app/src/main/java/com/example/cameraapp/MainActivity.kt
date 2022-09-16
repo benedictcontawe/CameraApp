@@ -1,8 +1,6 @@
 package com.example.cameraapp
 
-import android.content.Intent
 import android.os.Bundle
-import android.provider.MediaStore
 import android.view.View
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
@@ -16,11 +14,12 @@ public class MainActivity : BaseActivity(), View.OnClickListener, MainListener {
     }
 
     private var binder : MainBinder? = null
-    private val viewModel : OptionBottomSheetViewModel by lazy { ViewModelProvider(this@MainActivity).get(OptionBottomSheetViewModel::class.java) }
+    private val optionViewModel : OptionBottomSheetViewModel by lazy { ViewModelProvider(this@MainActivity).get(OptionBottomSheetViewModel::class.java) }
+    private val cameraViewModel : CameraViewModel by lazy { ViewModelProvider(this@MainActivity).get(CameraViewModel::class.java) }
 
     override fun onCreate(savedInstanceState : Bundle?) {
         binder = DataBindingUtil.setContentView(this@MainActivity, R.layout.activity_main)
-        binder?.setViewModel(viewModel)
+        binder?.setViewModel(optionViewModel)
         binder?.setLifecycleOwner(this@MainActivity)
         super.onCreate(savedInstanceState)
     }
@@ -30,7 +29,7 @@ public class MainActivity : BaseActivity(), View.OnClickListener, MainListener {
     }
 
     override fun onClick(view : View?) {
-        if (view == binder?.imageView && viewModel.isShowed().not() == true)
+        if (view == binder?.imageView && optionViewModel.isShowed().not() == true)
             showBottomSheetFragment( OptionBottomSheetDialogFragment.newInstance(this@MainActivity) )
     }
 
@@ -56,6 +55,6 @@ public class MainActivity : BaseActivity(), View.OnClickListener, MainListener {
 
     override fun onRequestPermissionsGranted(requestCode : Int) {
         super.onRequestPermissionsGranted(requestCode)
-        viewModel.checkRequestPermissionsResult(requestCode)
+        optionViewModel.checkRequestPermissionsResult(requestCode)
     }
 }
