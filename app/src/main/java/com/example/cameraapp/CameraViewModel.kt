@@ -6,6 +6,7 @@ import android.media.AudioManager
 import android.media.MediaActionSound
 import android.net.Uri
 import android.os.*
+import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
 import androidx.core.content.FileProvider
 import java.io.File
@@ -17,6 +18,8 @@ class CameraViewModel : BaseAndroidViewModel {
     }
 
     private val audio : AudioManager
+    public val imageCapture : ImageCapture by lazy { ImageCapture.Builder().build() }
+    public var lensFacing : Int = CameraSelector.LENS_FACING_BACK
     private val vibrator : Vibrator
     private val vibratorManager : VibratorManager?
 
@@ -91,9 +94,24 @@ class CameraViewModel : BaseAndroidViewModel {
         return Uri.fromFile(file)
     }
 
+    public fun getOutputFileOptions() : ImageCapture.OutputFileOptions {
+        return ImageCapture.OutputFileOptions.Builder(
+            getCacheFile()
+        ).build()
+    }
+
+    public fun getCameraSelector() : CameraSelector {
+        return CameraSelector.Builder().requireLensFacing(lensFacing).build()
+    }
+
     public fun logImageSaved(output : ImageCapture.OutputFileResults) {
         logDebug(TAG,"logImageSaved ${output.getSavedUri()}")
     }
+
+    public fun flipCamera() { Coroutines.io(this@CameraViewModel, {
+        if (lensFacing == CameraSelector.LENS_FACING_FRONT) lensFacing = CameraSelector.LENS_FACING_BACK
+        else if (lensFacing == CameraSelector.LENS_FACING_BACK) lensFacing = CameraSelector.LENS_FACING_FRONT
+    } ) }
 
     public fun playShutter() { Coroutines.io(this@CameraViewModel, {
         if (audio.getRingerMode() == AudioManager.RINGER_MODE_NORMAL) {

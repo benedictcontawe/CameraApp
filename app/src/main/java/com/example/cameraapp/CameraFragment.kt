@@ -26,8 +26,6 @@ class CameraFragment : BaseFragment() {
 
     private var binder : CameraBinder? = null
     private val viewModel : CameraViewModel by lazy { ViewModelProvider(requireActivity()).get(CameraViewModel::class.java) }
-    private val imageCapture : ImageCapture by lazy { ImageCapture.Builder().build() }
-    private var lensFacing : Int = CameraSelector.LENS_FACING_BACK
 
     override fun onCreateView(inflater : LayoutInflater, container : ViewGroup?, savedInstanceState : Bundle?) : View? {
         binder = DataBindingUtil.inflate(inflater, R.layout.fragment_camera,container,false)
@@ -50,19 +48,13 @@ class CameraFragment : BaseFragment() {
             takePhoto()
             true
         } else if (isActionUp && isInsideBounds(view) && view == binder?.buttonLensFlip) {
-            flipCamera()
+            binder?.getViewModel()?.flipCamera()
             startCamera()
             true
         } else super.onTouchFragment(view, event)
     }
 
-    private fun flipCamera() {
-        if (lensFacing == CameraSelector.LENS_FACING_FRONT) lensFacing = CameraSelector.LENS_FACING_BACK
-        else if (lensFacing == CameraSelector.LENS_FACING_BACK) lensFacing = CameraSelector.LENS_FACING_FRONT
-    }
-
-    private fun startCamera() {
-        val cameraSelector = CameraSelector.Builder().requireLensFacing(lensFacing).build()
+    private fun startCamera() { Coroutines.main(this@CameraFragment, {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(requireContext())
         val cameraProvider : ProcessCameraProvider = cameraProviderFuture.get()
         val preview = Preview.Builder().build()
@@ -71,7 +63,7 @@ class CameraFragment : BaseFragment() {
                 try {
                     preview.setSurfaceProvider(binder?.previewView?.getSurfaceProvider())
                     cameraProvider.unbindAll()
-                    cameraProvider.bindToLifecycle(binder?.getLifecycleOwner()!!, cameraSelector, preview, imageCapture)
+                    cameraProvider.bindToLifecycle(binder?.getLifecycleOwner()!!, binder?.getViewModel()?.getCameraSelector()!!, preview, binder?.getViewModel()?.imageCapture!!)
                 } catch (e : ExecutionException) {
                     logError(TAG, e.message, e)
                 } catch (e : InterruptedException) {
@@ -79,13 +71,11 @@ class CameraFragment : BaseFragment() {
                 }
             }, ContextCompat.getMainExecutor(requireContext())
         )
-    }
+    } ) }
 
-    private fun takePhoto() {
-        val photoFile = binder?.getViewModel()?.getCacheFile()
-        val outputOptions = ImageCapture.OutputFileOptions.Builder(photoFile!!).build()
-        imageCapture.takePicture(
-            outputOptions,
+    private fun takePhoto() { Coroutines.main(this@CameraFragment, {
+        binder?.getViewModel()?.imageCapture?.takePicture(
+            binder?.getViewModel()?.getOutputFileOptions()!!,
             ContextCompat.getMainExecutor(requireContext()),
             object : ImageCapture.OnImageSavedCallback {
                 override fun onImageSaved(output : ImageCapture.OutputFileResults) {
@@ -97,5 +87,5 @@ class CameraFragment : BaseFragment() {
                     binder?.buttonShutterCapture?.setOnTouchListener(this@CameraFragment)
             }
         })
-    }
+    } ) }
 }
