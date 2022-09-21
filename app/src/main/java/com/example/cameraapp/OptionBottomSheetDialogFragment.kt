@@ -13,7 +13,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
-class OptionBottomSheetDialogFragment : BaseBottomSheetDialogFragment {
+public class OptionBottomSheetDialogFragment : BaseBottomSheetDialogFragment {
 
     companion object {
         private val TAG = OptionBottomSheetDialogFragment::class.java.getSimpleName()
@@ -49,6 +49,7 @@ class OptionBottomSheetDialogFragment : BaseBottomSheetDialogFragment {
 
     override suspend fun onSetObservers(scope : CoroutineScope) {
         binder?.buttonTakePhoto?.setOnTouchListener(this@OptionBottomSheetDialogFragment)
+        binder?.buttonRecordVideo?.setOnTouchListener(this@OptionBottomSheetDialogFragment)
         binder?.buttonChoosePhoto?.setOnTouchListener(this@OptionBottomSheetDialogFragment)
         binder?.buttonEditPhoto?.setOnTouchListener(this@OptionBottomSheetDialogFragment)
         binder?.buttonDeletePhoto?.setOnTouchListener(this@OptionBottomSheetDialogFragment)
@@ -56,12 +57,13 @@ class OptionBottomSheetDialogFragment : BaseBottomSheetDialogFragment {
         scope.launch( block = { binder?.getViewModel()?.observeGrantedRequestCode()?.collectLatest( action = { grantedCode ->
             if (grantedCode == ManifestPermission.CAMERA_PERMISSION_CODE) {
                 listener?.launchCamera()
-                dismissNow()
-                //binder?.getViewModel()?.acknowledgeGrantedRequestCode()
+                dismissNow() //binder?.getViewModel()?.acknowledgeGrantedRequestCode()
             } else if (grantedCode == ManifestPermission.GALLERY_PERMISSION_CODE) {
                 listener?.launchGallery()
+                dismissNow() //binder?.getViewModel()?.acknowledgeGrantedRequestCode()
+            } else if (grantedCode == ManifestPermission.VIDEO_CALL_PERMISSION_CODE) {
+                listener?.launchVideo()
                 dismissNow()
-                //binder?.getViewModel()?.acknowledgeGrantedRequestCode()
             }
         } ) } )
     }
@@ -69,6 +71,9 @@ class OptionBottomSheetDialogFragment : BaseBottomSheetDialogFragment {
     override fun onTouchFragment(view : View, event : MotionEvent) : Boolean {
         return if (isActionUp && isInsideBounds(view) && view == binder?.buttonTakePhoto) {
             onLaunchCamera()
+            true
+        } else if (isActionUp && isInsideBounds(view) && view == binder?.buttonRecordVideo) {
+            onLaunchVideo()
             true
         } else if (isActionUp && isInsideBounds(view) && view == binder?.buttonChoosePhoto) {
             onLaunchGallery()
@@ -123,6 +128,22 @@ class OptionBottomSheetDialogFragment : BaseBottomSheetDialogFragment {
                         requireActivity(),
                         ManifestPermission.galleryPermissions,
                         ManifestPermission.GALLERY_PERMISSION_CODE
+                )
+            }
+        )
+    }
+
+    private fun onLaunchVideo() {
+        ManifestPermission.checkSelfPermission(
+            requireContext(), ManifestPermission.videoCallPermission,
+            isGranted = {
+                this.listener?.launchVideo()
+                dismissNow()
+            }, isDenied = {
+                ManifestPermission.requestPermissions(
+                    requireActivity(),
+                    ManifestPermission.videoCallPermission,
+                    ManifestPermission.VIDEO_CALL_PERMISSION_CODE
                 )
             }
         )

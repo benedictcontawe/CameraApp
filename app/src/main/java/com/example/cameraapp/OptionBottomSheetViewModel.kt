@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 
-class OptionBottomSheetViewModel : BaseAndroidViewModel {
+public class OptionBottomSheetViewModel : BaseAndroidViewModel {
 
     companion object {
         private val TAG = OptionBottomSheetViewModel::class.java.getSimpleName()
@@ -37,7 +37,7 @@ class OptionBottomSheetViewModel : BaseAndroidViewModel {
     //endregion
     //region Granted Request Code Methods
     public fun checkRequestPermissionsResult(requestCode : Int) { Coroutines.io(this@OptionBottomSheetViewModel, {
-        if (requestCode == ManifestPermission.CAMERA_PERMISSION_CODE || requestCode == ManifestPermission.GALLERY_PERMISSION_CODE) {
+        if (requestCode == ManifestPermission.CAMERA_PERMISSION_CODE || requestCode == ManifestPermission.VIDEO_CALL_PERMISSION_CODE || requestCode == ManifestPermission.GALLERY_PERMISSION_CODE) {
             liveMediaPermission.emit(requestCode)
         }
     } ) }

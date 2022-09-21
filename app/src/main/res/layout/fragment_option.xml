@@ -49,13 +49,24 @@
             app:layout_constraintEnd_toEndOf="@id/constraint_guideline_vertical_trailing" />
 
         <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/button_record_video"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Record Video"
+            android:textColor="@color/dark_blue"
+            android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
+            app:layout_constraintTop_toBottomOf="@id/button_take_photo"
+            app:layout_constraintStart_toStartOf="@id/constraint_guideline_vertical_leading"
+            app:layout_constraintEnd_toEndOf="@id/constraint_guideline_vertical_trailing" />
+
+        <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/button_choose_photo"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="@string/choose_photo"
             android:textColor="@color/dark_blue"
             android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
-            app:layout_constraintTop_toBottomOf="@id/button_take_photo"
+            app:layout_constraintTop_toBottomOf="@id/button_record_video"
             app:layout_constraintStart_toStartOf="@id/constraint_guideline_vertical_leading"
             app:layout_constraintEnd_toEndOf="@id/constraint_guideline_vertical_trailing" />
 

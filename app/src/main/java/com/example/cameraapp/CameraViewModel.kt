@@ -11,7 +11,7 @@ import androidx.camera.core.ImageCapture
 import androidx.core.content.FileProvider
 import java.io.File
 
-class CameraViewModel : BaseAndroidViewModel {
+public class CameraViewModel : BaseAndroidViewModel {
 
     companion object {
         private val TAG = CameraViewModel::class.java.getSimpleName()

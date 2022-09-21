@@ -53,6 +53,10 @@ public class MainActivity : BaseActivity(), View.OnClickListener, MainListener {
         //startActivityForResult(galleryIntent, GALLERY_MEDIA_CODE)
     }
 
+    override fun launchVideo() {
+        addToBackStackFragment(R.id.frame_layout, VideoFragment.newInstance())
+    }
+
     override fun onRequestPermissionsGranted(requestCode : Int) {
         super.onRequestPermissionsGranted(requestCode)
         optionViewModel.checkRequestPermissionsResult(requestCode)

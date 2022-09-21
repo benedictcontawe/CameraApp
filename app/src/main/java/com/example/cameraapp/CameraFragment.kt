@@ -14,7 +14,7 @@ import com.example.cameraapp.databinding.CameraBinder
 import kotlinx.coroutines.CoroutineScope
 import java.util.concurrent.ExecutionException
 
-class CameraFragment : BaseFragment() {
+public class CameraFragment : BaseFragment() {
 
     companion object {
         private val TAG = CameraFragment::class.java.getSimpleName()
@@ -45,7 +45,7 @@ class CameraFragment : BaseFragment() {
             binder?.buttonShutterCapture?.setOnTouchListener(null)
             binder?.getViewModel()?.playShutter()
             binder?.getViewModel()?.playVibrate()
-            takePhoto()
+            capturePhoto()
             true
         } else if (isActionUp && isInsideBounds(view) && view == binder?.buttonLensFlip) {
             binder?.getViewModel()?.flipCamera()
@@ -73,7 +73,7 @@ class CameraFragment : BaseFragment() {
         )
     } ) }
 
-    private fun takePhoto() { Coroutines.main(this@CameraFragment, {
+    private fun capturePhoto() { Coroutines.main(this@CameraFragment, {
         binder?.getViewModel()?.imageCapture?.takePicture(
             binder?.getViewModel()?.getOutputFileOptions()!!,
             ContextCompat.getMainExecutor(requireContext()),
