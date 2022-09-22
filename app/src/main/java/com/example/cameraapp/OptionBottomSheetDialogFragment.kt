@@ -59,7 +59,7 @@ public class OptionBottomSheetDialogFragment : BaseBottomSheetDialogFragment {
             } else if (grantedCode == ManifestPermission.GALLERY_PERMISSION_CODE) {
                 listener?.launchGallery()
                 dismissNow() //binder?.getViewModel()?.acknowledgeGrantedRequestCode()
-            } else if (grantedCode == ManifestPermission.VIDEO_CALL_PERMISSION_CODE) {
+            } else if (grantedCode == ManifestPermission.VIDEO_RECORD_PERMISSION_CODE) {
                 listener?.launchVideo()
                 dismissNow()
             }
@@ -134,7 +134,7 @@ public class OptionBottomSheetDialogFragment : BaseBottomSheetDialogFragment {
                 ManifestPermission.requestPermissions(
                     requireActivity(),
                     ManifestPermission.videoRecordPermission,
-                    ManifestPermission.VIDEO_CALL_PERMISSION_CODE
+                    ManifestPermission.VIDEO_RECORD_PERMISSION_CODE
                 )
             }
         )
