@@ -4,7 +4,7 @@ interface MainListener {
 
     public fun launchCamera()
 
-    public fun launchGallery()
-
     public fun launchVideo()
+
+    public fun launchGallery()
 }
