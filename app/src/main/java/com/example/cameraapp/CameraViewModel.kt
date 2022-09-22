@@ -6,9 +6,16 @@ import android.media.AudioManager
 import android.media.MediaActionSound
 import android.net.Uri
 import android.os.*
+import android.util.Size
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
+import androidx.camera.core.Preview
+import androidx.camera.lifecycle.ProcessCameraProvider
+import androidx.camera.video.*
 import androidx.core.content.FileProvider
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import java.io.File
 
 public class CameraViewModel : BaseAndroidViewModel {
@@ -19,11 +26,19 @@ public class CameraViewModel : BaseAndroidViewModel {
 
     private val audio : AudioManager
     public val imageCapture : ImageCapture by lazy { ImageCapture.Builder().build() }
+    public val preview : Preview by lazy { Preview.Builder().build() }
+
+    public val recorder : Recorder by lazy { Recorder.Builder().setQualitySelector(getQualitySelector()).build() }
+    //public val videoCapture : VideoCapture by lazy { VideoCapture.withOutput(recorder) }
+    //public val videoCapture : VideoCaptureConfig by lazy { VideoCaptureConfig }
+
     public var lensFacing : Int = CameraSelector.LENS_FACING_BACK
+    private val isRecording : MutableStateFlow<Boolean?>
     private val vibrator : Vibrator
     private val vibratorManager : VibratorManager?
 
     constructor(application : Application) : super(application) {
+        isRecording = MutableStateFlow(null)
         audio = getApplication<Application>().getSystemService(Context.AUDIO_SERVICE) as AudioManager
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             vibratorManager = getApplication<Application>().getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
@@ -34,16 +49,35 @@ public class CameraViewModel : BaseAndroidViewModel {
         }
     }
 
+    public fun toggleRecording() { Coroutines.io(this@CameraViewModel, work = {
+        logError(TAG,"toggleRecording")
+        if (isRecording.value == true) isRecording.emit(false)
+        else isRecording.emit(true)
+    } ) }
+
+    public fun observeRecording() : StateFlow<Boolean?> {
+        return isRecording.asStateFlow()
+    }
+
+    public fun getResolutions(selector : CameraSelector, provider : ProcessCameraProvider) : Map<Quality, Size> {
+        return selector.filter(provider.availableCameraInfos).firstOrNull()?.let { camInfo ->
+            QualitySelector.getSupportedQualities(camInfo).associateWith { quality ->
+                QualitySelector.getResolution(camInfo, quality)!!
+            }
+        } ?: emptyMap()
+    }
+
+    public fun getQualitySelector() : QualitySelector {
+        return QualitySelector.from(Quality.HIGHEST, FallbackStrategy.higherQualityOrLowerThan(Quality.SD))
+    }
+
     public fun createCameraPictureFile() : Uri {
         val packageName : String = getApplication<Application>().getApplicationContext().getPackageName()
         val authority : String = "$packageName.fileprovider"
         return when {
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.N -> {
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.N ->
                 FileProvider.getUriForFile(getApplication(), authority, getCacheFile())
-            }
-            else -> {
-                Uri.fromFile(getCacheFile())
-            }
+            else -> Uri.fromFile(getCacheFile())
         }
     }
 

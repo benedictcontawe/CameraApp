@@ -45,7 +45,7 @@ public class CameraFragment : BaseFragment() {
             binder?.buttonShutterCapture?.setOnTouchListener(null)
             binder?.getViewModel()?.playShutter()
             binder?.getViewModel()?.playVibrate()
-            capturePhoto()
+            takePicture()
             true
         } else if (isActionUp && isInsideBounds(view) && view == binder?.buttonLensFlip) {
             binder?.getViewModel()?.flipCamera()
@@ -57,23 +57,25 @@ public class CameraFragment : BaseFragment() {
     private fun startCamera() { Coroutines.main(this@CameraFragment, {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(requireContext())
         val cameraProvider : ProcessCameraProvider = cameraProviderFuture.get()
-        val preview = Preview.Builder().build()
-        cameraProviderFuture.addListener(
-            {
-                try {
-                    preview.setSurfaceProvider(binder?.previewView?.getSurfaceProvider())
-                    cameraProvider.unbindAll()
-                    cameraProvider.bindToLifecycle(binder?.getLifecycleOwner()!!, binder?.getViewModel()?.getCameraSelector()!!, preview, binder?.getViewModel()?.imageCapture!!)
-                } catch (e : ExecutionException) {
-                    logError(TAG, e.message, e)
-                } catch (e : InterruptedException) {
-                    e.printStackTrace();
-                }
-            }, ContextCompat.getMainExecutor(requireContext())
-        )
+        cameraProviderFuture.addListener( {
+            try {
+                binder?.getViewModel()?.preview?.setSurfaceProvider(binder?.previewView?.getSurfaceProvider())
+                cameraProvider.unbindAll()
+                cameraProvider.bindToLifecycle (
+                    binder?.getLifecycleOwner()!!,
+                    binder?.getViewModel()?.getCameraSelector()!!,
+                    binder?.getViewModel()?.preview,
+                    binder?.getViewModel()?.imageCapture!!
+                )
+            } catch (e : ExecutionException) {
+                logError(TAG, e.message, e)
+            } catch (e : InterruptedException) {
+                e.printStackTrace();
+            }
+        }, ContextCompat.getMainExecutor(requireContext()) )
     } ) }
 
-    private fun capturePhoto() { Coroutines.main(this@CameraFragment, {
+    private fun takePicture() { Coroutines.main(this@CameraFragment, {
         binder?.getViewModel()?.imageCapture?.takePicture(
             binder?.getViewModel()?.getOutputFileOptions()!!,
             ContextCompat.getMainExecutor(requireContext()),

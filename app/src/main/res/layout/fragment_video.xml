@@ -100,7 +100,7 @@
             android:scaleType="fitXY"
             app:srcCompat="@drawable/ic_change"
             app:layout_constraintDimensionRatio="1:1"
-            app:layout_constraintTop_toTopOf="@id/button_shutter_capture"
+            app:layout_constraintTop_toTopOf="@id/button_shutter_record"
             app:layout_constraintStart_toStartOf="@id/constraint_guideline_vertical_change_leading"
             app:layout_constraintEnd_toEndOf="@id/constraint_guideline_vertical_trailing"
             app:layout_constraintBottom_toBottomOf="@id/button_shutter_record" />
