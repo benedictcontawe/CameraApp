@@ -79,6 +79,7 @@ public class VideoFragment : BaseFragment() {
                 try {
                     binder?.getViewModel()?.preview?.setSurfaceProvider(binder?.previewView?.getSurfaceProvider())
                     binder?.getViewModel()?.cameraProvider?.unbindAll()
+                    binder?.getViewModel()?.flipRecorder()
                     binder?.getViewModel()?.cameraProvider?.bindToLifecycle(
                         binder?.getLifecycleOwner()!!,
                         binder?.getViewModel()?.getCameraSelector()!!,

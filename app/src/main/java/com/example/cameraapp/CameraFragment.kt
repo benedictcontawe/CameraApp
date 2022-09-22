@@ -77,7 +77,7 @@ public class CameraFragment : BaseFragment() {
 
     private fun takePicture() { Coroutines.main(this@CameraFragment, {
         binder?.getViewModel()?.imageCapture?.takePicture(
-            binder?.getViewModel()?.getOutputFileOptions(getString(R.string._jpg))!!,
+            binder?.getViewModel()?.getOutputFileOptions(null)!!,
             ContextCompat.getMainExecutor(requireContext()),
             object : ImageCapture.OnImageSavedCallback {
                 override fun onImageSaved(output : ImageCapture.OutputFileResults) {

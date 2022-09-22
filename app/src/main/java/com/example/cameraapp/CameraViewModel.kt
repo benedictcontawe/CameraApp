@@ -36,9 +36,9 @@ public class CameraViewModel : BaseAndroidViewModel {
     public val preview : Preview by lazy { Preview.Builder().build() }
 
     private val isRecording : MutableStateFlow<Boolean?>
-    public val recorder : Recorder by lazy { Recorder.Builder().setQualitySelector(getQualitySelector()).build() }
+    public var recorder : Recorder? = null
     public var recording : Recording? = null
-    public val videoCapture : VideoCapture<Recorder> by lazy { VideoCapture.withOutput(recorder) }
+    public var videoCapture : VideoCapture<Recorder>? = null
 
     public var cameraProvider : ProcessCameraProvider? = null
     public var lensFacing : Int = CameraSelector.LENS_FACING_BACK
@@ -111,11 +111,18 @@ public class CameraViewModel : BaseAndroidViewModel {
         } ?: emptyMap()
     }
 
+    public fun flipRecorder() {
+        recorder = null
+        videoCapture = null
+        recorder = Recorder.Builder().setQualitySelector(getQualitySelector()).build()
+        videoCapture = VideoCapture.withOutput(recorder!!)
+    }
+
     @RequiresPermission(Manifest.permission.RECORD_AUDIO)
     private fun setRecording(contentResolver : ContentResolver, contentValues : ContentValues) : PendingRecording {
-        return videoCapture.getOutput()
-            .prepareRecording(getApplication(), getMediaStoreOutputOptions(contentResolver, contentValues))
-            .withAudioEnabled()
+        return videoCapture?.getOutput()
+            ?.prepareRecording(getApplication(), getMediaStoreOutputOptions(contentResolver, contentValues))
+            ?.withAudioEnabled()!!
     }
 
     @RequiresPermission(Manifest.permission.RECORD_AUDIO)
@@ -197,7 +204,6 @@ public class CameraViewModel : BaseAndroidViewModel {
 
         val fileName : String
         //fileName = "${UUID.randomUUID()}${_root_ide_package_.com.example.cameraapp.Constants.IMAGE_SUFFIX}.jpg"
-        //fileName = "${UUID.randomUUID()}${_root_ide_package_.com.example.cameraapp.Constants.IMAGE_SUFFIX}"
         fileName = "${System.currentTimeMillis()}${Constants.IMAGE_SUFFIX}"
 
         val fileValue : File
@@ -216,9 +222,9 @@ public class CameraViewModel : BaseAndroidViewModel {
         return Uri.fromFile(file)
     }
 
-    public fun getOutputFileOptions(suffix : String) : ImageCapture.OutputFileOptions {
+    public fun getOutputFileOptions(suffix : String?) : ImageCapture.OutputFileOptions {
         return ImageCapture.OutputFileOptions.Builder(
-            getCacheFile(suffix)
+            getCacheFile(suffix ?: Constants.IMAGE_EXTENSION)
         ).build()
     }
 
