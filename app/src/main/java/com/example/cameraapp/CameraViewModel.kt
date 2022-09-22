@@ -178,17 +178,16 @@ public class CameraViewModel : BaseAndroidViewModel {
         val filePathFolder : File = File(dir,getString(R.string.camerax))
         if (!filePathFolder.exists()) filePathFolder.mkdirs()
 
-        val fileName : String = "${System.currentTimeMillis()}${getString(R.string._camera_x_sample)}"
+        val fileName : String = "${System.currentTimeMillis()}${Constants.IMAGE_SUFFIX}"
 
         val fileValue : File
-        fileValue = File.createTempFile(fileName, getString(R.string._jpg), filePathFolder)
+        fileValue = File.createTempFile(fileName, Constants.IMAGE_EXTENSION, filePathFolder)
 
         return fileValue
     }
 
     public fun getCacheFile(suffix : String) : File {
-        //This PC\Benedict's Galaxy J4+\Phone\Android\data\com.example.cameraapp\cache\CameraX
-        val cacheDir : File =
+        val cacheDir : File = //This PC\Benedict's Galaxy J4+\Phone\Android\data\com.example.cameraapp\cache\CameraX
             if (isExternalStorageWritable().not()) getApplication<Application>().getCacheDir()
             else getApplication<Application>().getExternalCacheDir()!!
 
@@ -197,9 +196,9 @@ public class CameraViewModel : BaseAndroidViewModel {
         if (!filePathFolder.exists()) filePathFolder.mkdirs()
 
         val fileName : String
-        //fileName = "${UUID.randomUUID()}${getString(R.string._camera_x_sample)}.jpg"
-        //fileName = "${UUID.randomUUID()}${getString(R.string._camera_x_sample)}"
-        fileName = "${System.currentTimeMillis()}${getString(R.string._camera_x_sample)}"
+        //fileName = "${UUID.randomUUID()}${_root_ide_package_.com.example.cameraapp.Constants.IMAGE_SUFFIX}.jpg"
+        //fileName = "${UUID.randomUUID()}${_root_ide_package_.com.example.cameraapp.Constants.IMAGE_SUFFIX}"
+        fileName = "${System.currentTimeMillis()}${Constants.IMAGE_SUFFIX}"
 
         val fileValue : File
         //fileValue = File(filePath,fileName)
@@ -235,9 +234,8 @@ public class CameraViewModel : BaseAndroidViewModel {
     }
 
     public fun getContentValues(name : String?, path : String?) : ContentValues {
-        // This PC\Benedict's Galaxy J4+\Phone\video
-        val values : ContentValues = ContentValues()
-        values.put(MediaStore.MediaColumns.DISPLAY_NAME, name ?: "${System.currentTimeMillis()}${getString(R.string._camera_x_sample)}")
+        val values : ContentValues = ContentValues() // This PC\Benedict's Galaxy J4+\Phone\video
+        values.put(MediaStore.MediaColumns.DISPLAY_NAME, name ?: "${System.currentTimeMillis()}${Constants.IMAGE_SUFFIX}")
         values.put(MediaStore.MediaColumns.MIME_TYPE, "video/mp4")
         values.put(MediaStore.MediaColumns.DATE_ADDED, System.currentTimeMillis())
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {

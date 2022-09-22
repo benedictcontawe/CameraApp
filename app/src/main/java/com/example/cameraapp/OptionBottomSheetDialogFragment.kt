@@ -51,8 +51,6 @@ public class OptionBottomSheetDialogFragment : BaseBottomSheetDialogFragment {
         binder?.buttonTakePhoto?.setOnTouchListener(this@OptionBottomSheetDialogFragment)
         binder?.buttonRecordVideo?.setOnTouchListener(this@OptionBottomSheetDialogFragment)
         binder?.buttonChoosePhoto?.setOnTouchListener(this@OptionBottomSheetDialogFragment)
-        binder?.buttonEditPhoto?.setOnTouchListener(this@OptionBottomSheetDialogFragment)
-        binder?.buttonDeletePhoto?.setOnTouchListener(this@OptionBottomSheetDialogFragment)
         binder?.buttonCancel?.setOnTouchListener(this@OptionBottomSheetDialogFragment)
         scope.launch( block = { binder?.getViewModel()?.observeGrantedRequestCode()?.collectLatest( action = { grantedCode ->
             if (grantedCode == ManifestPermission.CAMERA_PERMISSION_CODE) {
@@ -77,13 +75,6 @@ public class OptionBottomSheetDialogFragment : BaseBottomSheetDialogFragment {
             true
         } else if (isActionUp && isInsideBounds(view) && view == binder?.buttonChoosePhoto) {
             onLaunchGallery()
-            true
-        } else if (isActionUp && isInsideBounds(view) && view == binder?.buttonEditPhoto) {
-            launchEditPhoto()
-            true
-        } else if (isActionUp && isInsideBounds(view) && view == binder?.buttonDeletePhoto) {
-            //viewModel?.deletePhoto()
-            dismissNow()
             true
         } else if (isActionUp && isInsideBounds(view) && view == binder?.buttonCancel) {
             dismissNow()
@@ -147,10 +138,5 @@ public class OptionBottomSheetDialogFragment : BaseBottomSheetDialogFragment {
                 )
             }
         )
-    }
-
-    public fun launchEditPhoto() { //TODO: Use Camera X Feature
-        //startActivityForResult(editIntent, CROP_MEDIA_CODE)
-        //mainActivity.showToast("Edit Mode Under Construction")
     }
 }
