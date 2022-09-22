@@ -135,14 +135,14 @@ public class OptionBottomSheetDialogFragment : BaseBottomSheetDialogFragment {
 
     private fun onLaunchVideo() {
         ManifestPermission.checkSelfPermission(
-            requireContext(), ManifestPermission.videoCallPermission,
+            requireContext(), ManifestPermission.videoRecordPermission,
             isGranted = {
                 this.listener?.launchVideo()
                 dismissNow()
             }, isDenied = {
                 ManifestPermission.requestPermissions(
                     requireActivity(),
-                    ManifestPermission.videoCallPermission,
+                    ManifestPermission.videoRecordPermission,
                     ManifestPermission.VIDEO_CALL_PERMISSION_CODE
                 )
             }

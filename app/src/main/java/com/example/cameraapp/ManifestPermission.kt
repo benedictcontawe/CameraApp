@@ -78,6 +78,12 @@ public object ManifestPermission {
         Manifest.permission.CAMERA
     )
 
+    val videoRecordPermission = arrayOf(
+        Manifest.permission.RECORD_AUDIO,
+        Manifest.permission.CAMERA,
+        Manifest.permission.WRITE_EXTERNAL_STORAGE
+    )
+
     val galleryPermissions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
         arrayOf(
             Manifest.permission.READ_EXTERNAL_STORAGE,

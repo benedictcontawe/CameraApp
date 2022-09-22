@@ -1,13 +1,16 @@
 package com.example.cameraapp
 
+import android.Manifest
+import android.content.ContentValues
 import android.os.Bundle
+import android.provider.MediaStore
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
-import androidx.camera.core.CameraProvider
-import androidx.camera.core.Preview
+import androidx.annotation.RequiresPermission
 import androidx.camera.lifecycle.ProcessCameraProvider
+import androidx.camera.video.MediaStoreOutputOptions
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
@@ -37,23 +40,29 @@ public class VideoFragment : BaseFragment() {
         return binder?.root ?: super.onCreateView(inflater, container, savedInstanceState)
     }
 
+    @RequiresPermission(Manifest.permission.RECORD_AUDIO)
     override suspend fun onSetObservers(scope : CoroutineScope) {
         startCamera()
         binder?.buttonShutterRecord?.setOnTouchListener(this@VideoFragment)
         binder?.buttonLensFlip?.setOnTouchListener(this@VideoFragment)
         scope.launch( block = {
             binder?.getViewModel()?.observeRecording()?.collectLatest( action = { isRecording ->
-                logError(TAG,"observeRecording $isRecording")
-                if (isRecording == true) binder?.buttonShutterRecord?.setImageResource(R.drawable.ic_recording)
-                else binder?.buttonShutterRecord?.setImageResource(R.drawable.ic_record)
+                logDebug(TAG,"observeRecording $isRecording")
+                if (isRecording == true) {
+                    binder?.buttonShutterRecord?.setImageResource(R.drawable.ic_recording)
+                    captureVideo()
+                } else {
+                    binder?.buttonShutterRecord?.setImageResource(R.drawable.ic_record)
+                    binder?.getViewModel()?.stopRecording()
+                }
             } )
         } )
     }
 
+    @RequiresPermission(Manifest.permission.RECORD_AUDIO)
     override fun onTouchFragment(view : View, event : MotionEvent) : Boolean {
         return if(isActionUp && isInsideBounds(view) && view == binder?.buttonShutterRecord) {
             binder?.getViewModel()?.toggleRecording()
-            captureVideo()
             true
         } else if (isActionUp && isInsideBounds(view) && view == binder?.buttonLensFlip) {
             binder?.getViewModel()?.flipCamera()
@@ -64,23 +73,39 @@ public class VideoFragment : BaseFragment() {
 
     private fun startCamera() { Coroutines.main(this@VideoFragment, {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(requireContext())
-        val cameraProvider : ProcessCameraProvider = cameraProviderFuture.get()
+        binder?.getViewModel()?.cameraProvider = cameraProviderFuture.get()
         cameraProviderFuture.addListener(
             {
                 try {
                     binder?.getViewModel()?.preview?.setSurfaceProvider(binder?.previewView?.getSurfaceProvider())
-                    cameraProvider.unbindAll()
-                    //cameraProvider.bindToLifecycle(binder?.getLifecycleOwner()!!, binder?.getViewModel()?.getCameraSelector()!!, binder?.getViewModel()?.preview, binder?.getViewModel()?.videoCapture!!)
+                    binder?.getViewModel()?.cameraProvider?.unbindAll()
+                    binder?.getViewModel()?.cameraProvider?.bindToLifecycle(
+                        binder?.getLifecycleOwner()!!,
+                        binder?.getViewModel()?.getCameraSelector()!!,
+                        binder?.getViewModel()?.preview,
+                        binder?.getViewModel()?.videoCapture!!,
+                    )
                 } catch (e : ExecutionException) {
                     logError(TAG, e.message, e)
                 } catch (e : InterruptedException) {
                     e.printStackTrace();
                 }
-            }, ContextCompat.getMainExecutor(requireContext())
+            }, ContextCompat.getMainExecutor( requireContext() )
         )
     } ) }
 
+    @RequiresPermission(Manifest.permission.RECORD_AUDIO)
     private fun captureVideo() { Coroutines.main(this@VideoFragment, {
-
+        binder?.getViewModel()?.startRecording(
+            requireActivity().getContentResolver(),
+            binder?.getViewModel()?.getContentValues(null, null)!!,
+            ContextCompat.getMainExecutor(requireContext()),
+            binder?.getViewModel()?.getRecordingListener()!!
+        )
     } ) }
+
+    override fun onDestroy() {
+        binder?.getViewModel()?.cameraProvider?.unbindAll()
+        super.onDestroy()
+    }
 }

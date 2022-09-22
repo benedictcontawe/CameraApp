@@ -56,12 +56,12 @@ public class CameraFragment : BaseFragment() {
 
     private fun startCamera() { Coroutines.main(this@CameraFragment, {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(requireContext())
-        val cameraProvider : ProcessCameraProvider = cameraProviderFuture.get()
+        binder?.getViewModel()?.cameraProvider = cameraProviderFuture.get()
         cameraProviderFuture.addListener( {
             try {
                 binder?.getViewModel()?.preview?.setSurfaceProvider(binder?.previewView?.getSurfaceProvider())
-                cameraProvider.unbindAll()
-                cameraProvider.bindToLifecycle (
+                binder?.getViewModel()?.cameraProvider?.unbindAll()
+                binder?.getViewModel()?.cameraProvider?.bindToLifecycle (
                     binder?.getLifecycleOwner()!!,
                     binder?.getViewModel()?.getCameraSelector()!!,
                     binder?.getViewModel()?.preview,
@@ -72,12 +72,12 @@ public class CameraFragment : BaseFragment() {
             } catch (e : InterruptedException) {
                 e.printStackTrace();
             }
-        }, ContextCompat.getMainExecutor(requireContext()) )
+        }, ContextCompat.getMainExecutor( requireContext()) )
     } ) }
 
     private fun takePicture() { Coroutines.main(this@CameraFragment, {
         binder?.getViewModel()?.imageCapture?.takePicture(
-            binder?.getViewModel()?.getOutputFileOptions()!!,
+            binder?.getViewModel()?.getOutputFileOptions(getString(R.string._jpg))!!,
             ContextCompat.getMainExecutor(requireContext()),
             object : ImageCapture.OnImageSavedCallback {
                 override fun onImageSaved(output : ImageCapture.OutputFileResults) {
@@ -90,4 +90,9 @@ public class CameraFragment : BaseFragment() {
             }
         })
     } ) }
+
+    override fun onDestroy() {
+        binder?.getViewModel()?.cameraProvider?.unbindAll()
+        super.onDestroy()
+    }
 }
