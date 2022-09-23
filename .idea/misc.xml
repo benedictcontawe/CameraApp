@@ -3,6 +3,7 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/Benedict/Android Studio Projects/CameraApp/app/src/main/res/drawable/ic_change.xml" value="0.1" />
         <entry key="..\:/Benedict/Android Studio Projects/CameraApp/app/src/main/res/drawable/ic_change_aura.xml" value="0.166" />
         <entry key="..\:/Benedict/Android Studio Projects/CameraApp/app/src/main/res/drawable/ic_record.xml" value="0.1475" />
         <entry key="..\:/Benedict/Android Studio Projects/CameraApp/app/src/main/res/drawable/ic_recording.xml" value="0.1455" />
@@ -11,6 +12,7 @@
         <entry key="..\:/Benedict/Android Studio Projects/CameraApp/app/src/main/res/layout/fragment_camera.xml" value="0.2421875" />
         <entry key="..\:/Benedict/Android Studio Projects/CameraApp/app/src/main/res/layout/fragment_option.xml" value="0.2421875" />
         <entry key="..\:/Benedict/Android Studio Projects/CameraApp/app/src/main/res/layout/fragment_video.xml" value="0.24114583333333334" />
+        <entry key="..\:/Benedict/Android Studio Projects/CameraApp/app/src/main/res/layout/layout_camera.xml" value="0.2625" />
         <entry key="..\:/Benedict/Android Studio Projects/CameraApp_/app/src/main/res/layout/activity_main.xml" value="0.228125" />
         <entry key="..\:/Benedict/Android Studio Projects/CameraApp_/app/src/main/res/layout/fragment_option.xml" value="0.264" />
         <entry key="..\:/Benedict/Android Studio Projects/CameraApp_/app/src/main/res/layout/layout_camera.xml" value="0.24114583333333334" />

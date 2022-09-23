@@ -3,7 +3,7 @@
     <data class="OptionBinder" >
         <variable
             name="viewModel"
-            type="com.example.cameraapp.OptionBottomSheetViewModel" />
+            type="com.example.cameraapp.OptionViewModel" />
     </data>
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"

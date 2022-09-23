@@ -14,7 +14,7 @@ public class MainActivity : BaseActivity(), View.OnClickListener, MainListener {
     }
 
     private var binder : MainBinder? = null
-    private val optionViewModel : OptionBottomSheetViewModel by lazy { ViewModelProvider(this@MainActivity).get(OptionBottomSheetViewModel::class.java) }
+    private val optionViewModel : OptionViewModel by lazy { ViewModelProvider(this@MainActivity).get(OptionViewModel::class.java) }
     private val cameraViewModel : CameraViewModel by lazy { ViewModelProvider(this@MainActivity).get(CameraViewModel::class.java) }
 
     override fun onCreate(savedInstanceState : Bundle?) {

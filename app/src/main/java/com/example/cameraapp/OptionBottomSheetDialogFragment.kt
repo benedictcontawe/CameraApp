@@ -24,7 +24,7 @@ public class OptionBottomSheetDialogFragment : BaseBottomSheetDialogFragment {
     }
 
     private var binder : OptionBinder? = null
-    private val viewModel : OptionBottomSheetViewModel by lazy { ViewModelProvider(requireActivity()).get(OptionBottomSheetViewModel::class.java) }
+    private val viewModel : OptionViewModel by lazy { ViewModelProvider(requireActivity()).get(OptionViewModel::class.java) }
     private var listener : MainListener? = null
 
     constructor() {
