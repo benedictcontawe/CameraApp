@@ -30,6 +30,7 @@ android {
         dataBinding true
         viewBinding true
     }
+    namespace 'com.example.cameraapp'
 }
 
 dependencies {
