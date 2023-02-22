@@ -1,6 +1,8 @@
 package com.example.cameraapp
 
+import android.content.Intent
 import android.os.Bundle
+import android.provider.MediaStore
 import android.view.View
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
@@ -49,8 +51,14 @@ public class MainActivity : BaseActivity(), View.OnClickListener, MainListener {
     }
 
     override fun launchGallery() { showToast("launch Gallery")
-        //val galleryIntent : Intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
-        //startActivityForResult(galleryIntent, GALLERY_MEDIA_CODE)
+        //TODO: Create Gallery Fragment for Custom
+        val galleryIntent : Intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+        //galleryIntent.setType("image/*")
+        //galleryIntent.setAction(Intent.ACTION_GET_CONTENT)
+        startActivityForResult(
+            galleryIntent /*Intent.createChooser(galleryIntent, "Select Picture")*/,
+            ManifestPermission.GALLERY_PERMISSION_CODE
+        )
     }
 
     override fun launchVideo() {
@@ -60,5 +68,10 @@ public class MainActivity : BaseActivity(), View.OnClickListener, MainListener {
     override fun onRequestPermissionsGranted(requestCode : Int) {
         super.onRequestPermissionsGranted(requestCode)
         optionViewModel.checkRequestPermissionsResult(requestCode)
+    }
+
+    override fun onRequestPermissionsNeverAskAgain() {
+        super.onRequestPermissionsNeverAskAgain()
+        ManifestPermission.showRationaleDialog(this@MainActivity,"Go to App Permission Settings?")
     }
 }

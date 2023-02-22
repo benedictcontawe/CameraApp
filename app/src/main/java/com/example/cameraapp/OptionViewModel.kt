@@ -37,7 +37,7 @@ public class OptionViewModel : BaseAndroidViewModel {
     //endregion
     //region Granted Request Code Methods
     public fun checkRequestPermissionsResult(requestCode : Int) { Coroutines.io(this@OptionViewModel, {
-        if (requestCode == ManifestPermission.CAMERA_PERMISSION_CODE || requestCode == ManifestPermission.VIDEO_CALL_PERMISSION_CODE || requestCode == ManifestPermission.GALLERY_PERMISSION_CODE) {
+        if (requestCode == ManifestPermission.CAMERA_PERMISSION_CODE || requestCode == ManifestPermission.VIDEO_RECORD_PERMISSION_CODE || requestCode == ManifestPermission.GALLERY_PERMISSION_CODE) {
             liveMediaPermission.emit(requestCode)
         }
     } ) }

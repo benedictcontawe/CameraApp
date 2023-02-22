@@ -1,5 +1,6 @@
 package com.example.cameraapp
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -119,6 +120,17 @@ abstract public class BaseActivity : AppCompatActivity() {
         logDebug(TAG, "onRequestPermissionsGranted($requestCode)")
     }
     //endregion
+    /**
+     *
+     * @param requestCode the request code from ManifestPermission Codes
+     *
+     * A readable representation of standard activity result codes
+     * @param resultCode the result code (Activity.RESULT_CANCELED, Activity.RESULT_OK, Activity.RESULT_FIRST_USER)
+     */
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        logDebug(TAG, "MainActivity onActivityResult($requestCode, $resultCode, ${data?.getData()})")
+    }
     //region onBackPressed Methods
     override fun onBackPressed() { logDebug(TAG,"onBackPressed()")
         if (getSupportFragmentManager().getBackStackEntryCount() > 0) { logDebug(TAG,"popBackStack()")
