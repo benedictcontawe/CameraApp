@@ -2,12 +2,14 @@ package com.example.cameraapp
 
 import android.Manifest
 import android.content.ContentValues
+import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import androidx.annotation.RequiresApi
 import androidx.annotation.RequiresPermission
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.video.MediaStoreOutputOptions
@@ -40,6 +42,7 @@ public class VideoFragment : BaseFragment() {
         return binder?.root ?: super.onCreateView(inflater, container, savedInstanceState)
     }
 
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     @RequiresPermission(Manifest.permission.RECORD_AUDIO)
     override suspend fun onSetObservers(scope : CoroutineScope) {
         startCamera()
@@ -59,6 +62,7 @@ public class VideoFragment : BaseFragment() {
         } )
     }
 
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     @RequiresPermission(Manifest.permission.RECORD_AUDIO)
     override fun onTouchFragment(view : View, event : MotionEvent) : Boolean {
         return if(isActionUp && isInsideBounds(view) && view == binder?.buttonShutterRecord) {
@@ -71,6 +75,7 @@ public class VideoFragment : BaseFragment() {
         } else super.onTouchFragment(view, event)
     }
 
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     private fun startCamera() { Coroutines.main(this@VideoFragment, {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(requireContext())
         binder?.getViewModel()?.cameraProvider = cameraProviderFuture.get()
@@ -95,6 +100,7 @@ public class VideoFragment : BaseFragment() {
         )
     } ) }
 
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     @RequiresPermission(Manifest.permission.RECORD_AUDIO)
     private fun captureVideo() { Coroutines.main(this@VideoFragment, {
         binder?.getViewModel()?.startRecording(
@@ -105,6 +111,7 @@ public class VideoFragment : BaseFragment() {
         )
     } ) }
 
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     override fun onDestroy() {
         binder?.getViewModel()?.cameraProvider?.unbindAll()
         super.onDestroy()

@@ -76,7 +76,7 @@ public class CameraFragment : BaseFragment() {
     } ) }
 
     private fun takePicture() { Coroutines.main(this@CameraFragment, {
-        binder?.getViewModel()?.imageCapture?.takePicture(
+        binder?.getViewModel()?.imageCapture?.takePicture (
             binder?.getViewModel()?.getOutputFileOptions(null)!!,
             ContextCompat.getMainExecutor(requireContext()),
             object : ImageCapture.OnImageSavedCallback {

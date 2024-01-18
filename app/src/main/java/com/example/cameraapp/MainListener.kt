@@ -1,7 +1,6 @@
 package com.example.cameraapp
 
-interface MainListener {
-
+public interface MainListener {
     public fun launchCamera()
 
     public fun launchVideo()

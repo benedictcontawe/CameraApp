@@ -59,11 +59,11 @@ abstract public class BaseActivity : AppCompatActivity() {
             .commitNow()
     }
 
-    protected fun addToBackStackFragment(containerViewId : Int, fragment : BaseFragment) {
-        logDebug(TAG, "addToBackStackFragment($containerViewId,$fragment)")
+    protected fun addToBackStackFragment(id : Int, fragment : BaseFragment) {
+        logDebug(TAG, "addToBackStackFragment($id,$fragment)")
         if (getSupportFragmentManager().findFragmentByTag(fragment::class.java.getSimpleName()) == null)
             getSupportFragmentManager().beginTransaction()
-                .add(containerViewId, fragment, fragment::class.java.getSimpleName())
+                .add(id, fragment, fragment::class.java.getSimpleName())
                 .addToBackStack(fragment::class.java.getSimpleName())
                 .commit()
     }

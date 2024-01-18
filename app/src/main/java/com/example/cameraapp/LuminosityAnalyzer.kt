@@ -1,5 +1,7 @@
 package com.example.cameraapp
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageProxy
 import java.nio.ByteBuffer
@@ -23,8 +25,8 @@ public class LuminosityAnalyzer : ImageAnalysis.Analyzer {
         return data // Return the byte array
     }
 
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     override fun analyze(image : ImageProxy) {
-
         val buffer = image.planes[0].buffer
         val data = buffer.toByteArray()
         val pixels = data.map { it.toInt() and 0xFF }

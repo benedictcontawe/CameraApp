@@ -11,6 +11,7 @@ import android.net.Uri
 import android.os.*
 import android.provider.MediaStore
 import android.util.Size
+import androidx.annotation.RequiresApi
 import androidx.annotation.RequiresPermission
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
@@ -57,6 +58,7 @@ public class CameraViewModel : BaseAndroidViewModel {
         }
     }
     //region Image and Video Methods
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     public fun getCameraSelector() : CameraSelector {
         return CameraSelector.Builder().requireLensFacing(lensFacing).build()
     }
@@ -92,6 +94,7 @@ public class CameraViewModel : BaseAndroidViewModel {
         return isRecording.asStateFlow()
     }
 
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     private fun getQualitySelector() : QualitySelector {
         return QualitySelector.fromOrderedList( listOf (
             Quality.UHD,
@@ -103,6 +106,7 @@ public class CameraViewModel : BaseAndroidViewModel {
         ) )
     }
 
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     public fun getResolutions(selector : CameraSelector, provider : ProcessCameraProvider) : Map<Quality, Size> {
         return selector.filter(provider.availableCameraInfos).firstOrNull()?.let { camInfo ->
             QualitySelector.getSupportedQualities(camInfo).associateWith { quality ->
@@ -111,6 +115,7 @@ public class CameraViewModel : BaseAndroidViewModel {
         } ?: emptyMap()
     }
 
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     public fun flipRecorder() {
         recorder = null
         videoCapture = null
@@ -118,6 +123,7 @@ public class CameraViewModel : BaseAndroidViewModel {
         videoCapture = VideoCapture.withOutput(recorder!!)
     }
 
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     @RequiresPermission(Manifest.permission.RECORD_AUDIO)
     private fun setRecording(contentResolver : ContentResolver, contentValues : ContentValues) : PendingRecording {
         return videoCapture?.getOutput()
@@ -125,25 +131,30 @@ public class CameraViewModel : BaseAndroidViewModel {
             ?.withAudioEnabled()!!
     }
 
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     @RequiresPermission(Manifest.permission.RECORD_AUDIO)
     public fun startRecording(contentResolver : ContentResolver, contentValues : ContentValues, listenerExecutor : Executor, listener : Consumer<VideoRecordEvent> ) {
         recording = setRecording(contentResolver, contentValues).start(listenerExecutor, listener)
     }
 
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     public fun pauseRecording() {
         recording?.pause()
     }
 
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     public fun resumeRecording() {
         recording?.resume()
     }
 
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     public fun stopRecording() {
         recording?.stop()
     }
 
     public fun getRecordingListener() : Consumer<VideoRecordEvent> {
         return object : Consumer<VideoRecordEvent> {
+            @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
             override fun accept(event : VideoRecordEvent?) {
                 if (event is VideoRecordEvent.Start) {
                     logDebug(TAG, "Video Record Event Start")
@@ -222,21 +233,24 @@ public class CameraViewModel : BaseAndroidViewModel {
         return Uri.fromFile(file)
     }
 
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     public fun getOutputFileOptions(suffix : String?) : ImageCapture.OutputFileOptions {
-        return ImageCapture.OutputFileOptions.Builder(
+        return ImageCapture.OutputFileOptions.Builder (
             getCacheFile(suffix ?: Constants.IMAGE_EXTENSION)
         ).build()
     }
 
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     public fun logImageSaved(output : ImageCapture.OutputFileResults) {
         logDebug(TAG,"logImageSaved ${output.getSavedUri()}")
     }
 
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     public fun getMediaStoreOutputOptions(contentResolver : ContentResolver, contentValues : ContentValues) : MediaStoreOutputOptions{
-        return MediaStoreOutputOptions.Builder(contentResolver,
-            MediaStore.Video.Media.EXTERNAL_CONTENT_URI)
-            .setContentValues(contentValues)
-            .build()
+        return MediaStoreOutputOptions.Builder (
+            contentResolver,
+            MediaStore.Video.Media.EXTERNAL_CONTENT_URI
+        ).setContentValues(contentValues).build()
     }
 
     public fun getContentValues(name : String?, path : String?) : ContentValues {
@@ -253,6 +267,7 @@ public class CameraViewModel : BaseAndroidViewModel {
         return values
     }
     //endregion
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     override fun onCleared() {
         recording?.close()
         super.onCleared()

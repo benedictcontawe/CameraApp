@@ -6,7 +6,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-object Coroutines {
+public object Coroutines {
     //region UI contexts
     fun main(work : suspend (() -> Unit)) =
         CoroutineScope(Dispatchers.Main.immediate).launch {
@@ -14,25 +14,25 @@ object Coroutines {
         }
     fun main(activity : BaseActivity, work : suspend ((scope : CoroutineScope) -> Unit)) =
         activity.lifecycleScope.launch {
-            activity.getLifecycle().repeatOnLifecycle(Lifecycle.State.CREATED) {
+            activity.lifecycle.repeatOnLifecycle(Lifecycle.State.CREATED) {
                 work(this)
             }
         }
     fun main(fragment : BaseBottomSheetDialogFragment, work : suspend ((scope : CoroutineScope) -> Unit)) =
         fragment.lifecycleScope.launch {
-            fragment.getLifecycle().repeatOnLifecycle(Lifecycle.State.STARTED) {
+            fragment.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 work(this)
             }
         }
     fun main(fragment : BaseDialogFragment, work : suspend ((scope : CoroutineScope) -> Unit)) =
         fragment.lifecycleScope.launch {
-            fragment.getLifecycle().repeatOnLifecycle(Lifecycle.State.STARTED) {
+            fragment.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 work(this)
             }
         }
     fun main(fragment : BaseFragment, work : suspend ((scope : CoroutineScope) -> Unit)) =
         fragment.lifecycleScope.launch {
-            fragment.getLifecycle().repeatOnLifecycle(Lifecycle.State.STARTED) {
+            fragment.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 work(this)
             }
         }
