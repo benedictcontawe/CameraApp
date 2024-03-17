@@ -11,3 +11,5 @@
 - [How To Use The Gallery Images In Android Application](https://www.c-sharpcorner.com/article/how-to-use-the-gallery-images-in-android-application/#:~:text=Here%2C%20we%20have%20successfully%20used,by%20just%20touching%20the%20image.)
 
 - [How to open phones gallery through code](https://stackoverflow.com/questions/6016000/how-to-open-phones-gallery-through-code)
+
+- [Text Recognition with Jetpack Compose and CameraX](https://jordan-mungujakisa.medium.com/how-to-use-camerax-in-jetpack-compose-with-the-imageanalysis-use-case-f0e8f5261c3b)
