@@ -59,7 +59,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
-
             case R.id.scanButton:
                 predict();
                 break;
