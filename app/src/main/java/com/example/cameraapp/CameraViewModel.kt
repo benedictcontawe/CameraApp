@@ -67,14 +67,6 @@ public class CameraViewModel : BaseAndroidViewModel {
         if (lensFacing == CameraSelector.LENS_FACING_FRONT) lensFacing = CameraSelector.LENS_FACING_BACK
         else if (lensFacing == CameraSelector.LENS_FACING_BACK) lensFacing = CameraSelector.LENS_FACING_FRONT
     } ) }
-    //endregion
-    //region Image Methods
-    public fun playShutter() { Coroutines.io(this@CameraViewModel, {
-        if (audio.getRingerMode() == AudioManager.RINGER_MODE_NORMAL) {
-            val sound : MediaActionSound = MediaActionSound()
-            sound.play(MediaActionSound.SHUTTER_CLICK);
-        }
-    } ) }
 
     public fun playVibrate() { Coroutines.io(this@CameraViewModel, {
         val isAllowed : Boolean = audio.getRingerMode() == AudioManager.RINGER_MODE_NORMAL || audio.getRingerMode() == AudioManager.RINGER_MODE_VIBRATE
@@ -83,11 +75,29 @@ public class CameraViewModel : BaseAndroidViewModel {
         else if(isAllowed) vibrator.vibrate(Constants.VIBRATE_PATTERN,Constants.VIBRATE_ONCE)
     } ) }
     //endregion
+    //region Image Methods
+    public fun playShutter() { Coroutines.io(this@CameraViewModel, {
+        if (audio.getRingerMode() == AudioManager.RINGER_MODE_NORMAL) {
+            val sound : MediaActionSound = MediaActionSound()
+            sound.play(MediaActionSound.SHUTTER_CLICK);
+        }
+    } ) }
+    //endregion
     //region Video Methods
     public fun toggleRecording() { Coroutines.io(this@CameraViewModel, work = {
         logDebug(TAG,"toggleRecording")
         if (isRecording.value == true) isRecording.emit(false)
         else isRecording.emit(true)
+    } ) }
+
+    public fun playRecording() { Coroutines.io(this@CameraViewModel, {
+        logDebug(TAG,"toggleRecording")
+        val sound : MediaActionSound = MediaActionSound()
+        if (audio.getRingerMode() == AudioManager.RINGER_MODE_NORMAL && isRecording.value == true) {
+            sound.play(MediaActionSound.START_VIDEO_RECORDING);
+        } else if (audio.getRingerMode() == AudioManager.RINGER_MODE_NORMAL) {
+            sound.play(MediaActionSound.STOP_VIDEO_RECORDING);
+        }
     } ) }
 
     public fun observeRecording() : StateFlow<Boolean?> {

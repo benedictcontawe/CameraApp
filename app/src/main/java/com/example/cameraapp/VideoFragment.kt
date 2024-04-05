@@ -66,6 +66,8 @@ public class VideoFragment : BaseFragment() {
     @RequiresPermission(Manifest.permission.RECORD_AUDIO)
     override fun onTouchFragment(view : View, event : MotionEvent) : Boolean {
         return if(isActionUp && isInsideBounds(view) && view == binder?.buttonShutterRecord) {
+            binder?.getViewModel()?.playRecording()
+            binder?.getViewModel()?.playVibrate()
             binder?.getViewModel()?.toggleRecording()
             true
         } else if (isActionUp && isInsideBounds(view) && view == binder?.buttonLensFlip) {
