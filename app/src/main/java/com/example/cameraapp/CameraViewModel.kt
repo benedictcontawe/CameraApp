@@ -133,10 +133,6 @@ class CameraViewModel : BaseAndroidViewModel {
     public fun getVideoRoute() : String {
         return getString(R.string.record_video)
     }
-
-    public fun getGalleryRoute() : String {
-        return getString(R.string.choose_photo)
-    }
     //endregion
     //region Image and Video Methods
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)

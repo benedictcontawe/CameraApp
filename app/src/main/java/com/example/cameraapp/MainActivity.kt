@@ -1,12 +1,14 @@
 package com.example.cameraapp
 
 import android.Manifest
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.res.Resources
 import android.graphics.drawable.AdaptiveIconDrawable
 import android.os.Build
 import android.os.Bundle
+import android.provider.MediaStore
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -182,7 +184,7 @@ public class MainActivity : ComponentActivity() {
                 composable (
                     route = viewModel.getVideoRoute(),
                     content = {
-                        viewModel.checkCameraPermission(requestPermissionLauncher )
+                        viewModel.checkCameraPermission(requestPermissionLauncher ) //TODO: Video Request Permission
                         val isGranted : Boolean by viewModel.observeCameraPermission().observeAsState(false)
                         if (isGranted) {
                             VideoComposable()
@@ -192,17 +194,6 @@ public class MainActivity : ComponentActivity() {
                                 textAlign = TextAlign.Center,
                             )
                         }
-                    }
-                )
-                composable (
-                    route = viewModel.getGalleryRoute(),
-                    content = {
-                        //TODO: Fix Gallery
-                        Text(
-                            modifier = Modifier.fillMaxSize(),
-                            text = "Under Construction",
-                            textAlign = TextAlign.Center,
-                        )
                     }
                 )
             }
@@ -407,7 +398,8 @@ public class MainActivity : ComponentActivity() {
                 Button (
                     onClick = {
                         scope.launch {
-                            navController.navigate(viewModel.getGalleryRoute())
+                            val galleryIntent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+                            galleryLauncher.launch(galleryIntent)
                             scaffoldState.bottomSheetState.partialExpand()
                         }
                     },
@@ -419,7 +411,7 @@ public class MainActivity : ComponentActivity() {
                             height = Dimension.wrapContent
                         }.fillMaxWidth(),
                     content = {
-                        Text(text = viewModel.getGalleryRoute())
+                        Text(text = stringResource(id = R.string.choose_photo))
                     }
                 )
                 Divider (
@@ -472,11 +464,18 @@ public class MainActivity : ComponentActivity() {
     }
 
     private val requestPermissionLauncher : ActivityResultLauncher<String> = registerForActivityResult( ActivityResultContracts.RequestPermission(),) { isGranted ->
-        Log.d("$TAG PERMISSIONS", "Launcher result: " + isGranted.toString())
+        Log.d("$TAG PERMISSIONS", "Request Launcher result: " + isGranted.toString())
         if (isGranted) {
             viewModel.grantedCameraPermission()
         } else {
             viewModel.deniedCameraPermission()
+        }
+    }
+
+    val galleryLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        Log.d("$TAG PERMISSIONS", "Gallery Launcher result: ${result.resultCode} ${result.data}")
+        if (result.resultCode == Activity.RESULT_OK) {
+            val data: Intent? = result.data
         }
     }
 }
