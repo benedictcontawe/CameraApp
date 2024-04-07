@@ -57,7 +57,7 @@ class CameraViewModel : BaseAndroidViewModel {
     public var videoCapture : VideoCapture<Recorder>? = null
 
     public var cameraProvider : ProcessCameraProvider? = null
-    public var lensFacing : MutableLiveData<Int> = MutableLiveData(CameraSelector.LENS_FACING_FRONT ?: CameraSelector.LENS_FACING_BACK)
+    public var lensFacing : Int = CameraSelector.LENS_FACING_FRONT ?: CameraSelector.LENS_FACING_BACK
     private val vibrator : Vibrator
     private val vibratorManager : VibratorManager?
 
@@ -154,17 +154,13 @@ class CameraViewModel : BaseAndroidViewModel {
     //endregion
     //region Image and Video Methods
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
-    public fun getCameraSelector(facing : Int) : CameraSelector {
-        return CameraSelector.Builder().requireLensFacing(facing).build()
-    }
-
-    public fun observeCameraSelector() : LiveData<Int> {
-        return lensFacing
+    public fun getCameraSelector() : CameraSelector {
+        return CameraSelector.Builder().requireLensFacing(lensFacing).build()
     }
 
     public fun flipCamera() { Coroutines.io(this@CameraViewModel, {
-        if (lensFacing.getValue() == CameraSelector.LENS_FACING_FRONT) lensFacing.postValue(CameraSelector.LENS_FACING_BACK)
-        else if (lensFacing.getValue() == CameraSelector.LENS_FACING_BACK) lensFacing.postValue(CameraSelector.LENS_FACING_FRONT)
+        if (lensFacing == CameraSelector.LENS_FACING_BACK) lensFacing = CameraSelector.LENS_FACING_FRONT
+        else if (lensFacing == CameraSelector.LENS_FACING_FRONT) lensFacing = CameraSelector.LENS_FACING_BACK
     } ) }
 
     public fun playVibrate() { Coroutines.io(this@CameraViewModel, {

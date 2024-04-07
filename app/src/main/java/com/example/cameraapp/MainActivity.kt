@@ -18,9 +18,9 @@ import androidx.activity.viewModels
 import androidx.annotation.DrawableRes
 import androidx.annotation.RequiresApi
 import androidx.annotation.RequiresPermission
-import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
+import androidx.camera.view.CameraController
 import androidx.camera.view.LifecycleCameraController
 import androidx.camera.view.PreviewView
 import androidx.compose.foundation.Image
@@ -211,10 +211,10 @@ public class MainActivity : ComponentActivity() {
         val previewView : PreviewView = remember { PreviewView(context) }
         val cameraController : LifecycleCameraController = remember { LifecycleCameraController(context) }
         val lifecycleOwner : LifecycleOwner = LocalLifecycleOwner.current
-        val lensFacing : Int by viewModel.observeCameraSelector().observeAsState(CameraSelector.LENS_FACING_FRONT)
         val executor : Executor = remember { Executors.newSingleThreadExecutor() }
         cameraController.bindToLifecycle(lifecycleOwner)
-        cameraController.setCameraSelector(viewModel.getCameraSelector(lensFacing))
+        cameraController.setCameraSelector(viewModel.getCameraSelector())
+        cameraController.setEnabledUseCases(CameraController.IMAGE_CAPTURE)
         previewView.setController(cameraController)
         ConstraintLayout(
             modifier = Modifier.fillMaxSize().background(Color.White),
@@ -223,7 +223,7 @@ public class MainActivity : ComponentActivity() {
                 val trailGuideline = createGuidelineFromEnd(0.05f)
                 val bottomGuideline = createGuidelineFromBottom(0.05f)
                 val (preview, shutter, flip) = createRefs()
-                Box(
+                Box (
                     modifier = Modifier.constrainAs(preview) {
                         top.linkTo(parent.top)
                         start.linkTo(parent.start)
@@ -267,6 +267,7 @@ public class MainActivity : ComponentActivity() {
                     },
                     onClick = {
                         viewModel.flipCamera()
+                        cameraController.setCameraSelector (viewModel.getCameraSelector())
                     },
                     content = {
                         Image(painter = painterResource(id = R.drawable.ic_change), contentDescription = null)
@@ -284,10 +285,10 @@ public class MainActivity : ComponentActivity() {
         val previewView : PreviewView = remember { PreviewView(context) }
         val cameraController : LifecycleCameraController = remember { LifecycleCameraController(context) }
         val lifecycleOwner : LifecycleOwner = LocalLifecycleOwner.current
-        val lensFacing : Int by viewModel.observeCameraSelector().observeAsState(CameraSelector.LENS_FACING_FRONT)
         val isRecording : Boolean by viewModel.observeRecording().collectAsState(initial = false)
         cameraController.bindToLifecycle(lifecycleOwner)
-        cameraController.setCameraSelector(viewModel.getCameraSelector(lensFacing))
+        cameraController.setCameraSelector(viewModel.getCameraSelector())
+        cameraController.setEnabledUseCases(CameraController.VIDEO_CAPTURE)
         previewView.setController(cameraController)
         ConstraintLayout (
             modifier = Modifier.fillMaxSize().background(Color.White),
