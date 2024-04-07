@@ -20,9 +20,11 @@ import androidx.annotation.RequiresApi
 import androidx.annotation.RequiresPermission
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
+import androidx.camera.video.FileOutputOptions
 import androidx.camera.view.CameraController
 import androidx.camera.view.LifecycleCameraController
 import androidx.camera.view.PreviewView
+import androidx.camera.view.video.AudioConfig
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -63,6 +65,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
+import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.drawable.toBitmap
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
@@ -74,7 +77,6 @@ import androidx.navigation.compose.rememberNavController
 import com.example.cameraapp.ui.theme.CameraAppTheme
 import kotlinx.coroutines.launch
 import java.util.concurrent.Executor
-import java.util.concurrent.Executors
 
 public class MainActivity : ComponentActivity() {
 
@@ -134,6 +136,11 @@ public class MainActivity : ComponentActivity() {
     @Composable
     private fun NavHostComposable(navController : NavHostController, scaffoldState : BottomSheetScaffoldState) {
         val scope = rememberCoroutineScope()
+        val context : Context = LocalContext.current
+        val previewView : PreviewView = remember { PreviewView(context) }
+        val cameraController : LifecycleCameraController = remember { LifecycleCameraController(context) }
+        val lifecycleOwner : LifecycleOwner = LocalLifecycleOwner.current
+        val executor : Executor = ContextCompat.getMainExecutor(context) //remember { Executors.newSingleThreadExecutor() }
         NavHost (
             navController = navController,
             startDestination = viewModel.getMainRoute(),
@@ -171,7 +178,7 @@ public class MainActivity : ComponentActivity() {
                     content = {
                         val isGranted : Boolean by viewModel.observeCameraPermission().observeAsState(false)
                         if (isGranted) {
-                            CameraComposable()
+                            CameraComposable(cameraController, lifecycleOwner, previewView, executor)
                         } else {
                             Text(
                                 modifier = Modifier.fillMaxSize().padding(16.dp),
@@ -186,7 +193,7 @@ public class MainActivity : ComponentActivity() {
                     content = {
                         val isGranted : Boolean by viewModel.observeVideoPermission().observeAsState(false)
                         if (isGranted && viewModel.checkVideoPermission()) {
-                            VideoComposable()
+                            VideoComposable(cameraController,lifecycleOwner, previewView, executor)
                         } else {
                             Text(
                                 modifier = Modifier.fillMaxSize().padding(16.dp),
@@ -206,12 +213,7 @@ public class MainActivity : ComponentActivity() {
     }
 
     @Composable
-    private fun CameraComposable() {
-        val context : Context = LocalContext.current
-        val previewView : PreviewView = remember { PreviewView(context) }
-        val cameraController : LifecycleCameraController = remember { LifecycleCameraController(context) }
-        val lifecycleOwner : LifecycleOwner = LocalLifecycleOwner.current
-        val executor : Executor = remember { Executors.newSingleThreadExecutor() }
+    private fun CameraComposable(cameraController : LifecycleCameraController, lifecycleOwner : LifecycleOwner, previewView : PreviewView, executor : Executor) {
         cameraController.bindToLifecycle(lifecycleOwner)
         cameraController.setCameraSelector(viewModel.getCameraSelector())
         cameraController.setEnabledUseCases(CameraController.IMAGE_CAPTURE)
@@ -280,11 +282,7 @@ public class MainActivity : ComponentActivity() {
     @Composable
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     @RequiresPermission(Manifest.permission.RECORD_AUDIO)
-    private fun VideoComposable() {
-        val context : Context = LocalContext.current
-        val previewView : PreviewView = remember { PreviewView(context) }
-        val cameraController : LifecycleCameraController = remember { LifecycleCameraController(context) }
-        val lifecycleOwner : LifecycleOwner = LocalLifecycleOwner.current
+    private fun VideoComposable(cameraController : LifecycleCameraController, lifecycleOwner : LifecycleOwner, previewView : PreviewView, executor : Executor) {
         val isRecording : Boolean by viewModel.observeRecording().collectAsState(initial = false)
         cameraController.bindToLifecycle(lifecycleOwner)
         cameraController.setCameraSelector(viewModel.getCameraSelector())
@@ -322,10 +320,17 @@ public class MainActivity : ComponentActivity() {
                     content = {
                         if (isRecording) {
                             Image(painter = adaptiveIconPainterResource(id = R.drawable.ic_recording), contentDescription = null)
-                            captureVideo() //TODO: Fix Video Recording
+                            viewModel.startRecording (
+                                cameraController.startRecording (
+                                    FileOutputOptions.Builder(viewModel.getCacheFile(Constants.VIDEO_EXTENSION)).build(),
+                                    AudioConfig.create(true),
+                                    executor,
+                                    viewModel.getRecordingListener()
+                                )
+                            )
                         } else {
                             Image(painter = adaptiveIconPainterResource(id = R.drawable.ic_record), contentDescription = null)
-                            viewModel.stopRecording() //TODO: Fix Video Recording
+                            viewModel.stopRecording()
                         }
                     }
                 )
@@ -334,7 +339,10 @@ public class MainActivity : ComponentActivity() {
                         end.linkTo(trailGuideline)
                         bottom.linkTo(bottomGuideline)
                     },
-                    onClick = { viewModel.flipCamera() },
+                    onClick = {
+                        viewModel.flipCamera()
+                        cameraController.setCameraSelector (viewModel.getCameraSelector())
+                    },
                     content = {
                         Image(painter = painterResource(id = R.drawable.ic_change), contentDescription = null)
                     }
@@ -385,7 +393,7 @@ public class MainActivity : ComponentActivity() {
                     onClick = {
                         scope.launch {
                             navController.navigate(viewModel.getVideoRoute())
-                            viewModel.checkVideoPermission(requestPermissionsLauncher) //TODO: Video Request Permission
+                            viewModel.checkVideoPermission(requestPermissionsLauncher)
                             scaffoldState.bottomSheetState.partialExpand()
                         }
                     },
@@ -450,19 +458,6 @@ public class MainActivity : ComponentActivity() {
                     }
                 )
             }
-        )
-    }
-
-    @Composable
-    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
-    @RequiresPermission(Manifest.permission.RECORD_AUDIO)
-    private fun captureVideo() {
-        val executor : Executor = remember { Executors.newSingleThreadExecutor() }
-        viewModel.startRecording (
-            this@MainActivity.getContentResolver(),
-            viewModel.getContentValues(null, null),
-            executor,
-            viewModel.getRecordingListener()
         )
     }
 

@@ -56,7 +56,7 @@ class CameraViewModel : BaseAndroidViewModel {
     public var recording : Recording? = null
     public var videoCapture : VideoCapture<Recorder>? = null
 
-    public var cameraProvider : ProcessCameraProvider? = null
+    //public var cameraProvider : ProcessCameraProvider? = null
     public var lensFacing : Int = CameraSelector.LENS_FACING_FRONT ?: CameraSelector.LENS_FACING_BACK
     private val vibrator : Vibrator
     private val vibratorManager : VibratorManager?
@@ -238,8 +238,12 @@ class CameraViewModel : BaseAndroidViewModel {
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     @RequiresPermission(Manifest.permission.RECORD_AUDIO)
-    public fun startRecording(contentResolver : ContentResolver, contentValues : ContentValues, listenerExecutor : Executor, listener : Consumer<VideoRecordEvent>) {
-        recording = setRecording(contentResolver, contentValues).start(listenerExecutor, listener)
+    public fun startRecording(recording : Recording) {
+        if (this.recording != null) {
+            this.recording?.stop()
+            this.recording = null
+        }
+        this.recording = recording
     }
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
@@ -255,6 +259,7 @@ class CameraViewModel : BaseAndroidViewModel {
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     public fun stopRecording() {
         recording?.stop()
+        this.recording = null
     }
 
     public fun getRecordingListener() : Consumer<VideoRecordEvent> {
@@ -278,6 +283,7 @@ class CameraViewModel : BaseAndroidViewModel {
         }
     }
     //endregion
+    //region File Storage Methods
     fun getFileExt(fileName : String) : String {
         return fileName.substring(fileName.lastIndexOf(".") + 1, fileName.length)
     }
@@ -305,7 +311,7 @@ class CameraViewModel : BaseAndroidViewModel {
         return fileValue
     }
 
-    private fun getCacheFile(suffix : String) : File {
+    public fun getCacheFile(suffix : String = Constants.IMAGE_EXTENSION) : File {
         val cacheDir : File =
             if (isExternalStorageWritable().not()) getApplication<Application>().getCacheDir()
             else getApplication<Application>().getExternalCacheDir()!!
@@ -351,7 +357,7 @@ class CameraViewModel : BaseAndroidViewModel {
         }
         return values
     }
-
+    //endregion
     override fun onCleared() {
         super.onCleared()
     }
