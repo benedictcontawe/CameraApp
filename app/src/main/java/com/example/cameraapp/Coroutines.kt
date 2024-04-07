@@ -1,7 +1,6 @@
 package com.example.cameraapp
 
 import androidx.lifecycle.*
-import com.beep.trade.view.fragments.BaseBottomSheetDialogFragment
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -11,30 +10,6 @@ public object Coroutines {
     fun main(work : suspend (() -> Unit)) =
         CoroutineScope(Dispatchers.Main.immediate).launch {
             work()
-        }
-    fun main(activity : BaseActivity, work : suspend ((scope : CoroutineScope) -> Unit)) =
-        activity.lifecycleScope.launch {
-            activity.lifecycle.repeatOnLifecycle(Lifecycle.State.CREATED) {
-                work(this)
-            }
-        }
-    fun main(fragment : BaseBottomSheetDialogFragment, work : suspend ((scope : CoroutineScope) -> Unit)) =
-        fragment.lifecycleScope.launch {
-            fragment.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                work(this)
-            }
-        }
-    fun main(fragment : BaseDialogFragment, work : suspend ((scope : CoroutineScope) -> Unit)) =
-        fragment.lifecycleScope.launch {
-            fragment.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                work(this)
-            }
-        }
-    fun main(fragment : BaseFragment, work : suspend ((scope : CoroutineScope) -> Unit)) =
-        fragment.lifecycleScope.launch {
-            fragment.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                work(this)
-            }
         }
     //endregion
     //region I/O operations

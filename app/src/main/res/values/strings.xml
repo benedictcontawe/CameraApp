@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">CameraApp</string>
     <string name="camerax">CameraX</string>
+    <string name="camera_not_granted">"Camera Not Granted"</string>
     <string name="camera_x">Camera X</string>
     <string name="cancel">Cancel</string>
     <string name="choose_photo">Choose Photo</string>

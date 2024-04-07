@@ -7,47 +7,63 @@ import android.content.ContentValues
 import android.content.Context
 import android.media.AudioManager
 import android.media.MediaActionSound
-import android.net.Uri
-import android.os.*
+import android.os.Build
+import android.os.Environment
+import android.os.VibrationEffect
+import android.os.Vibrator
+import android.os.VibratorManager
 import android.provider.MediaStore
+import android.util.Log
 import android.util.Size
+import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.RequiresApi
 import androidx.annotation.RequiresPermission
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
-import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
-import androidx.camera.video.*
-import androidx.core.content.FileProvider
+import androidx.camera.video.FallbackStrategy
+import androidx.camera.video.MediaStoreOutputOptions
+import androidx.camera.video.PendingRecording
+import androidx.camera.video.Quality
+import androidx.camera.video.QualitySelector
+import androidx.camera.video.Recorder
+import androidx.camera.video.Recording
+import androidx.camera.video.VideoCapture
+import androidx.camera.video.VideoRecordEvent
 import androidx.core.util.Consumer
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import java.io.File
 import java.util.concurrent.Executor
 
-public class CameraViewModel : BaseAndroidViewModel {
-
+class CameraViewModel : BaseAndroidViewModel {
     companion object {
         private val TAG = CameraViewModel::class.java.getSimpleName()
     }
 
-    private val audio : AudioManager
-    public val imageCapture : ImageCapture by lazy { ImageCapture.Builder().build() }
-    public val preview : Preview by lazy { Preview.Builder().build() }
+    public var keepSplashAlive  : Boolean
+    private var liveCameraGranted : MutableLiveData<Boolean>
 
-    private val isRecording : MutableStateFlow<Boolean?>
+    private val audio : AudioManager
+
+    private val isRecording : MutableStateFlow<Boolean>
     public var recorder : Recorder? = null
     public var recording : Recording? = null
     public var videoCapture : VideoCapture<Recorder>? = null
 
     public var cameraProvider : ProcessCameraProvider? = null
-    public var lensFacing : Int = CameraSelector.LENS_FACING_BACK
+    public var lensFacing : MutableLiveData<Int> = MutableLiveData(CameraSelector.LENS_FACING_FRONT ?: CameraSelector.LENS_FACING_BACK)
     private val vibrator : Vibrator
     private val vibratorManager : VibratorManager?
 
     constructor(application : Application) : super(application) {
-        isRecording = MutableStateFlow(null)
+        keepSplashAlive = true
+        liveCameraGranted = MutableLiveData<Boolean>()
+        isRecording = MutableStateFlow(false)
         audio = getApplication<Application>().getSystemService(Context.AUDIO_SERVICE) as AudioManager
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             vibratorManager = getApplication<Application>().getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
@@ -56,16 +72,85 @@ public class CameraViewModel : BaseAndroidViewModel {
             vibratorManager = null
             vibrator = getApplication<Application>().getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
         }
+        keepSplashAlive = false
     }
+    //region Camera Permission Methods
+    public fun checkCameraPermission(permissionResultResultLauncher: ActivityResultLauncher<String>) {
+        ManifestPermission.checkSelfPermission (
+            getApplication<Application>(),
+            ManifestPermission.cameraPermission,
+            isGranted = {
+                grantedCameraPermission()
+            },
+            isDenied = {
+                deniedCameraPermission()
+                ManifestPermission.requestPermission(
+                    permissionResultResultLauncher,
+                    ManifestPermission.cameraPermission
+                )
+            }
+        )
+    }
+
+    public fun checkVideoPermission(permissionResultResultLauncher: ActivityResultLauncher<Array<String>>) {
+        ManifestPermission.checkSelfPermission (
+            getApplication<Application>(),
+            ManifestPermission.videoRecordPermission,
+            isGranted = {
+                grantedCameraPermission()
+            },
+            isDenied = {
+                deniedCameraPermission()
+                ManifestPermission.requestPermission(
+                    permissionResultResultLauncher,
+                    ManifestPermission.videoRecordPermission
+                )
+            }
+        )
+    }
+
+    public fun grantedCameraPermission() {
+        liveCameraGranted.setValue(true)
+    }
+
+    public fun deniedCameraPermission() {
+        liveCameraGranted.setValue(false)
+    }
+
+    public fun observeCameraPermission() : LiveData<Boolean> {
+        return liveCameraGranted
+    }
+    //endregion
+    //region Navigation Route Methods
+    public fun getMainRoute() : String {
+        return getString(R.string.camerax)
+    }
+
+    public fun getCameraRoute() : String {
+        return getString(R.string.take_photo)
+    }
+
+    public fun getVideoRoute() : String {
+        return getString(R.string.record_video)
+    }
+
+    public fun getGalleryRoute() : String {
+        return getString(R.string.choose_photo)
+    }
+    //endregion
     //region Image and Video Methods
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
-    public fun getCameraSelector() : CameraSelector {
-        return CameraSelector.Builder().requireLensFacing(lensFacing).build()
+    public fun getCameraSelector(facing : Int) : CameraSelector {
+        return CameraSelector.Builder().requireLensFacing(facing).build()
+    }
+
+    public fun observeCameraSelector() : LiveData<Int> {
+        return lensFacing
     }
 
     public fun flipCamera() { Coroutines.io(this@CameraViewModel, {
-        if (lensFacing == CameraSelector.LENS_FACING_FRONT) lensFacing = CameraSelector.LENS_FACING_BACK
-        else if (lensFacing == CameraSelector.LENS_FACING_BACK) lensFacing = CameraSelector.LENS_FACING_FRONT
+        if (lensFacing.getValue() == CameraSelector.LENS_FACING_FRONT) lensFacing.postValue(CameraSelector.LENS_FACING_BACK)
+        else if (lensFacing.getValue() == CameraSelector.LENS_FACING_BACK) lensFacing.postValue(CameraSelector.LENS_FACING_FRONT)
     } ) }
 
     public fun playVibrate() { Coroutines.io(this@CameraViewModel, {
@@ -85,13 +170,13 @@ public class CameraViewModel : BaseAndroidViewModel {
     //endregion
     //region Video Methods
     public fun toggleRecording() { Coroutines.io(this@CameraViewModel, work = {
-        logDebug(TAG,"toggleRecording")
+        Log.d(TAG,"toggleRecording")
         if (isRecording.value == true) isRecording.emit(false)
         else isRecording.emit(true)
     } ) }
 
     public fun playRecording() { Coroutines.io(this@CameraViewModel, {
-        logDebug(TAG,"toggleRecording")
+        Log.d(TAG,"toggleRecording")
         val sound : MediaActionSound = MediaActionSound()
         if (audio.getRingerMode() == AudioManager.RINGER_MODE_NORMAL && isRecording.value == true) {
             sound.play(MediaActionSound.START_VIDEO_RECORDING);
@@ -100,7 +185,7 @@ public class CameraViewModel : BaseAndroidViewModel {
         }
     } ) }
 
-    public fun observeRecording() : StateFlow<Boolean?> {
+    public fun observeRecording() : StateFlow<Boolean> {
         return isRecording.asStateFlow()
     }
 
@@ -143,7 +228,7 @@ public class CameraViewModel : BaseAndroidViewModel {
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     @RequiresPermission(Manifest.permission.RECORD_AUDIO)
-    public fun startRecording(contentResolver : ContentResolver, contentValues : ContentValues, listenerExecutor : Executor, listener : Consumer<VideoRecordEvent> ) {
+    public fun startRecording(contentResolver : ContentResolver, contentValues : ContentValues, listenerExecutor : Executor, listener : Consumer<VideoRecordEvent>) {
         recording = setRecording(contentResolver, contentValues).start(listenerExecutor, listener)
     }
 
@@ -167,35 +252,31 @@ public class CameraViewModel : BaseAndroidViewModel {
             @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
             override fun accept(event : VideoRecordEvent?) {
                 if (event is VideoRecordEvent.Start) {
-                    logDebug(TAG, "Video Record Event Start")
+                    Log.d(TAG, "Video Record Event Start")
                 } else if (event is VideoRecordEvent.Finalize) {
-                    logDebug(TAG, "Video Record Event Finalize")
+                    Log.d(TAG, "Video Record Event Finalize")
                 } else if (event is VideoRecordEvent.Resume) {
-                    logDebug(TAG, "Video Record Event Resume")
+                    Log.d(TAG, "Video Record Event Resume")
                 } else if (event is VideoRecordEvent.Pause) {
-                    logDebug(TAG, "Video Record Event Pause")
+                    Log.d(TAG, "Video Record Event Pause")
                 } else if (event is VideoRecordEvent.Status) {
-                    logDebug(TAG, "Video Record Event Status")
+                    Log.d(TAG, "Video Record Event Status")
                 } else {
-                    logDebug(TAG, "Video Record Event else")
+                    Log.d(TAG, "Video Record Event else")
                 }
             }
         }
     }
     //endregion
-    //region Saving Media Files Methods
     fun getFileExt(fileName : String) : String {
         return fileName.substring(fileName.lastIndexOf(".") + 1, fileName.length)
     }
 
-    public fun createCameraPictureFile(suffix : String) : Uri {
-        val packageName : String = getApplication<Application>().getApplicationContext().getPackageName()
-        val authority : String = "$packageName.fileprovider"
-        return when {
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.N ->
-                FileProvider.getUriForFile(getApplication(), authority, getCacheFile(suffix))
-            else -> Uri.fromFile(getCacheFile(suffix))
-        }
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
+    public fun getOutputFileOptions(suffix : String?) : ImageCapture.OutputFileOptions {
+        return ImageCapture.OutputFileOptions.Builder (
+            getCacheFile(suffix ?: Constants.IMAGE_EXTENSION)
+        ).build()
     }
 
     public fun getFile() : File {
@@ -203,7 +284,7 @@ public class CameraViewModel : BaseAndroidViewModel {
             if (isExternalStorageWritable().not()) getApplication<Application>().getFilesDir()
             else getApplication<Application>().getExternalFilesDir(Environment.DIRECTORY_PICTURES)!!
 
-        val filePathFolder : File = File(dir,getString(R.string.camerax))
+        val filePathFolder : File = File(dir,String.format(getString(R.string.camerax)))
         if (!filePathFolder.exists()) filePathFolder.mkdirs()
 
         val fileName : String = "${System.currentTimeMillis()}${Constants.IMAGE_SUFFIX}"
@@ -214,22 +295,17 @@ public class CameraViewModel : BaseAndroidViewModel {
         return fileValue
     }
 
-    public fun getCacheFile(suffix : String) : File {
-        val cacheDir : File = //This PC\Benedict's Galaxy J4+\Phone\Android\data\com.example.cameraapp\cache\CameraX
+    private fun getCacheFile(suffix : String) : File {
+        val cacheDir : File =
             if (isExternalStorageWritable().not()) getApplication<Application>().getCacheDir()
             else getApplication<Application>().getExternalCacheDir()!!
 
-        val filePathFolder : File = File(cacheDir,getString(R.string.camerax))
-        //filePathFolder = Environment.getExternalStorageDirectory().getPath()
+        val filePathFolder : File = File(cacheDir, getString(R.string.camerax))
         if (!filePathFolder.exists()) filePathFolder.mkdirs()
 
-        val fileName : String
-        //fileName = "${UUID.randomUUID()}${_root_ide_package_.com.example.cameraapp.Constants.IMAGE_SUFFIX}.jpg"
-        fileName = "${System.currentTimeMillis()}${Constants.IMAGE_SUFFIX}"
+        val fileName : String = "${System.currentTimeMillis()}${Constants.IMAGE_SUFFIX}"
 
-        val fileValue : File
-        //fileValue = File(filePath,fileName)
-        fileValue = File.createTempFile(fileName, suffix, filePathFolder)
+        val fileValue : File = File.createTempFile(fileName, suffix, filePathFolder)
 
         return fileValue
     }
@@ -239,24 +315,13 @@ public class CameraViewModel : BaseAndroidViewModel {
         return Environment.MEDIA_MOUNTED == state
     }
 
-    private fun getUri(file : File) : Uri {
-        return Uri.fromFile(file)
-    }
-
-    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
-    public fun getOutputFileOptions(suffix : String?) : ImageCapture.OutputFileOptions {
-        return ImageCapture.OutputFileOptions.Builder (
-            getCacheFile(suffix ?: Constants.IMAGE_EXTENSION)
-        ).build()
-    }
-
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     public fun logImageSaved(output : ImageCapture.OutputFileResults) {
-        logDebug(TAG,"logImageSaved ${output.getSavedUri()}")
+        Log.d(TAG,"logImageSaved ${output.getSavedUri()}")
     }
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
-    public fun getMediaStoreOutputOptions(contentResolver : ContentResolver, contentValues : ContentValues) : MediaStoreOutputOptions{
+    public fun getMediaStoreOutputOptions(contentResolver : ContentResolver, contentValues : ContentValues) : MediaStoreOutputOptions {
         return MediaStoreOutputOptions.Builder (
             contentResolver,
             MediaStore.Video.Media.EXTERNAL_CONTENT_URI
@@ -276,10 +341,8 @@ public class CameraViewModel : BaseAndroidViewModel {
         }
         return values
     }
-    //endregion
-    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
+
     override fun onCleared() {
-        recording?.close()
         super.onCleared()
     }
 }
