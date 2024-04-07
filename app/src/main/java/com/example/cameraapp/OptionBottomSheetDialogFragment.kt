@@ -108,22 +108,6 @@ public class OptionBottomSheetDialogFragment : BaseBottomSheetDialogFragment {
         )
     }
 
-    private fun onLaunchGallery() {
-        ManifestPermission.checkSelfPermission(
-                requireContext(), ManifestPermission.galleryPermissions,
-                isGranted = {
-                    this.listener?.launchGallery()
-                    dismissNow()
-                }, isDenied = {
-                    ManifestPermission.requestPermissions(
-                        requireActivity(),
-                        ManifestPermission.galleryPermissions,
-                        ManifestPermission.GALLERY_PERMISSION_CODE
-                )
-            }
-        )
-    }
-
     private fun onLaunchVideo() {
         ManifestPermission.checkSelfPermission(
             requireContext(), ManifestPermission.videoRecordPermission,
@@ -135,6 +119,22 @@ public class OptionBottomSheetDialogFragment : BaseBottomSheetDialogFragment {
                     requireActivity(),
                     ManifestPermission.videoRecordPermission,
                     ManifestPermission.VIDEO_RECORD_PERMISSION_CODE
+                )
+            }
+        )
+    }
+
+    private fun onLaunchGallery() {
+        ManifestPermission.checkSelfPermission(
+                requireContext(), ManifestPermission.galleryPermissions,
+                isGranted = {
+                    this.listener?.launchGallery()
+                    dismissNow()
+                }, isDenied = {
+                    ManifestPermission.requestPermissions(
+                        requireActivity(),
+                        ManifestPermission.galleryPermissions,
+                        ManifestPermission.GALLERY_PERMISSION_CODE
                 )
             }
         )

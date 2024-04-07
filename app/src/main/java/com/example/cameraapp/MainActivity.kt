@@ -50,6 +50,10 @@ public class MainActivity : BaseActivity(), View.OnClickListener, MainListener {
         addToBackStackFragment(R.id.frame_layout, CameraFragment.newInstance())
     }
 
+    override fun launchVideo() {
+        addToBackStackFragment(R.id.frame_layout, VideoFragment.newInstance())
+    }
+
     override fun launchGallery() { showToast("launch Gallery")
         //TODO: Create Gallery Fragment for Custom
         val galleryIntent : Intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
@@ -59,10 +63,6 @@ public class MainActivity : BaseActivity(), View.OnClickListener, MainListener {
             galleryIntent /*Intent.createChooser(galleryIntent, "Select Picture")*/,
             ManifestPermission.GALLERY_PERMISSION_CODE
         )
-    }
-
-    override fun launchVideo() {
-        addToBackStackFragment(R.id.frame_layout, VideoFragment.newInstance())
     }
 
     override fun onRequestPermissionsGranted(requestCode : Int) {
