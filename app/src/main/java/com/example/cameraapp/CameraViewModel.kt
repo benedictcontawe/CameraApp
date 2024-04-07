@@ -47,6 +47,7 @@ class CameraViewModel : BaseAndroidViewModel {
 
     public var keepSplashAlive  : Boolean
     private var liveCameraGranted : MutableLiveData<Boolean>
+    private var liveVideoGranted : MutableLiveData<Boolean>
 
     private val audio : AudioManager
 
@@ -63,6 +64,7 @@ class CameraViewModel : BaseAndroidViewModel {
     constructor(application : Application) : super(application) {
         keepSplashAlive = true
         liveCameraGranted = MutableLiveData<Boolean>()
+        liveVideoGranted = MutableLiveData<Boolean>()
         isRecording = MutableStateFlow(false)
         audio = getApplication<Application>().getSystemService(Context.AUDIO_SERVICE) as AudioManager
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -92,15 +94,19 @@ class CameraViewModel : BaseAndroidViewModel {
         )
     }
 
+    public fun checkVideoPermission() : Boolean {
+        return ManifestPermission.checkSelfPermission(getApplication<Application>(), ManifestPermission.microphonePermission.first())
+    }
+
     public fun checkVideoPermission(permissionResultResultLauncher: ActivityResultLauncher<Array<String>>) {
         ManifestPermission.checkSelfPermission (
             getApplication<Application>(),
             ManifestPermission.videoRecordPermission,
             isGranted = {
-                grantedCameraPermission()
+                grantedVideoPermission()
             },
             isDenied = {
-                deniedCameraPermission()
+                deniedVideoPermission()
                 ManifestPermission.requestPermission(
                     permissionResultResultLauncher,
                     ManifestPermission.videoRecordPermission
@@ -117,8 +123,20 @@ class CameraViewModel : BaseAndroidViewModel {
         liveCameraGranted.setValue(false)
     }
 
+    public fun grantedVideoPermission() {
+        liveVideoGranted.setValue(true)
+    }
+
+    public fun deniedVideoPermission() {
+        liveVideoGranted.setValue(false)
+    }
+
     public fun observeCameraPermission() : LiveData<Boolean> {
         return liveCameraGranted
+    }
+
+    public fun observeVideoPermission() : LiveData<Boolean> {
+        return liveVideoGranted
     }
     //endregion
     //region Navigation Route Methods

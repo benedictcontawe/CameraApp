@@ -9,4 +9,5 @@
     <string name="edit_photo">Edit Photo</string>
     <string name="record_video">Record Video</string>
     <string name="take_photo">Take Photo</string>
+    <string name="video_not_granted">"Video Not Granted"</string>
 </resources>

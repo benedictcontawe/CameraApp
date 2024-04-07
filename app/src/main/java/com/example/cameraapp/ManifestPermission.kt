@@ -27,6 +27,10 @@ public object ManifestPermission {
         )
     }
 
+    val microphonePermission = arrayOf(
+        Manifest.permission.RECORD_AUDIO
+    )
+
     val galleryPermissions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
         arrayOf(
             Manifest.permission.READ_MEDIA_AUDIO,
@@ -46,6 +50,19 @@ public object ManifestPermission {
         arrayOf(
             Manifest.permission.WRITE_EXTERNAL_STORAGE
         )
+    }
+
+    fun checkSelfPermission(context : Context, permission : String,) : Boolean {
+        Log.d(TAG,"checkSelfPermission($context,$permission, isGranted(), isDenied())")
+        val isGranted : Boolean
+        if (ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED) {
+            Log.d(TAG,"isGranted()")
+            isGranted = true
+        } else {
+            Log.d(TAG,"denied()")
+            isGranted = false
+        }
+        return isGranted
     }
 
     fun checkSelfPermission(context : Context, permission : String, isGranted : () -> Unit = {}, isDenied : () -> Unit = {}) {

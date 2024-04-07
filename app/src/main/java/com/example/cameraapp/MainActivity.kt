@@ -29,6 +29,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.BottomSheetScaffoldState
@@ -62,7 +63,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
-import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.graphics.drawable.toBitmap
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
@@ -169,12 +169,12 @@ public class MainActivity : ComponentActivity() {
                 composable (
                     route = viewModel.getCameraRoute(),
                     content = {
-                        viewModel.checkCameraPermission(requestPermissionLauncher )
                         val isGranted : Boolean by viewModel.observeCameraPermission().observeAsState(false)
                         if (isGranted) {
                             CameraComposable()
                         } else {
                             Text(
+                                modifier = Modifier.fillMaxSize().padding(16.dp),
                                 text = stringResource(id = R.string.camera_not_granted),
                                 textAlign = TextAlign.Center,
                             )
@@ -184,13 +184,13 @@ public class MainActivity : ComponentActivity() {
                 composable (
                     route = viewModel.getVideoRoute(),
                     content = {
-                        viewModel.checkCameraPermission(requestPermissionLauncher ) //TODO: Video Request Permission
-                        val isGranted : Boolean by viewModel.observeCameraPermission().observeAsState(false)
-                        if (isGranted) {
+                        val isGranted : Boolean by viewModel.observeVideoPermission().observeAsState(false)
+                        if (isGranted && viewModel.checkVideoPermission()) {
                             VideoComposable()
                         } else {
                             Text(
-                                text = stringResource(id = R.string.camera_not_granted),
+                                modifier = Modifier.fillMaxSize().padding(16.dp),
+                                text = stringResource(id = R.string.video_not_granted),
                                 textAlign = TextAlign.Center,
                             )
                         }
@@ -367,6 +367,7 @@ public class MainActivity : ComponentActivity() {
                     onClick = {
                         scope.launch {
                             navController.navigate(viewModel.getCameraRoute())
+                            viewModel.checkCameraPermission(requestPermissionLauncher)
                             scaffoldState.bottomSheetState.partialExpand()
                         }
                     },
@@ -383,6 +384,7 @@ public class MainActivity : ComponentActivity() {
                     onClick = {
                         scope.launch {
                             navController.navigate(viewModel.getVideoRoute())
+                            viewModel.checkVideoPermission(requestPermissionsLauncher) //TODO: Video Request Permission
                             scaffoldState.bottomSheetState.partialExpand()
                         }
                     },
@@ -464,11 +466,20 @@ public class MainActivity : ComponentActivity() {
     }
 
     private val requestPermissionLauncher : ActivityResultLauncher<String> = registerForActivityResult( ActivityResultContracts.RequestPermission(),) { isGranted ->
-        Log.d("$TAG PERMISSIONS", "Request Launcher result: " + isGranted.toString())
+        Log.d("$TAG PERMISSIONS", "Camera Request Launcher result: " + isGranted.toString())
         if (isGranted) {
             viewModel.grantedCameraPermission()
         } else {
             viewModel.deniedCameraPermission()
+        }
+    }
+
+    private val requestPermissionsLauncher : ActivityResultLauncher<Array<String>> = registerForActivityResult( ActivityResultContracts.RequestMultiplePermissions()) { areGranted ->
+        Log.d("$TAG PERMISSIONS", "Video Request Launcher result: " + areGranted.toString())
+        if (areGranted.filter { isGranted -> isGranted.value == false }.isEmpty()) {
+            viewModel.grantedVideoPermission()
+        } else {
+            viewModel.deniedVideoPermission()
         }
     }
 
