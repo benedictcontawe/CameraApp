@@ -1,9 +1,12 @@
 package com.example.cameraapp
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.provider.MediaStore
+import android.util.Log
 import android.view.View
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import com.example.cameraapp.databinding.MainBinder
@@ -59,10 +62,21 @@ public class MainActivity : BaseActivity(), View.OnClickListener, MainListener {
         val galleryIntent : Intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
         //galleryIntent.setType("image/*")
         //galleryIntent.setAction(Intent.ACTION_GET_CONTENT)
+        /*
         startActivityForResult(
             galleryIntent /*Intent.createChooser(galleryIntent, "Select Picture")*/,
             ManifestPermission.GALLERY_PERMISSION_CODE
         )
+        */
+        galleryLauncher.launch(galleryIntent)
+    }
+
+    val galleryLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        Log.d("$TAG PERMISSIONS", "Gallery Launcher result: ${result.resultCode} ${result.data}")
+        if (result.resultCode == Activity.RESULT_OK) {
+            val data: Intent? = result.data
+            super.onActivityResult(ManifestPermission.GALLERY_PERMISSION_CODE, result.resultCode, data)
+        }
     }
 
     override fun onRequestPermissionsGranted(requestCode : Int) {

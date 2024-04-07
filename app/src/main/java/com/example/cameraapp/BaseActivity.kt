@@ -129,7 +129,7 @@ abstract public class BaseActivity : AppCompatActivity() {
      */
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        logDebug(TAG, "MainActivity onActivityResult($requestCode, $resultCode, ${data?.getData()})")
+        logDebug(TAG, "onActivityResult($requestCode, $resultCode, ${data?.getData()})")
     }
     //region onBackPressed Methods
     override fun onBackPressed() { logDebug(TAG,"onBackPressed()")
