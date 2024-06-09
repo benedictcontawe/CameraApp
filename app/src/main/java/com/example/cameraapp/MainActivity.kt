@@ -76,6 +76,7 @@ public class MainActivity : BaseActivity(), View.OnClickListener, MainListener {
         if (result.resultCode == Activity.RESULT_OK) {
             val data: Intent? = result.data
             super.onActivityResult(ManifestPermission.GALLERY_PERMISSION_CODE, result.resultCode, data)
+            //result.getData()?.getData()
         }
     }
 
