@@ -116,8 +116,7 @@ public object ManifestPermission {
     )
 
     val cameraPermission = arrayOf(
-        Manifest.permission.CAMERA,
-        Manifest.permission.READ_MEDIA_IMAGES
+        Manifest.permission.CAMERA
     )
 
     val videoCallPermission = arrayOf(
