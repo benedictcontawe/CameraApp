@@ -1,10 +1,12 @@
 package com.example.cameraapp
 
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import androidx.annotation.RequiresApi
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
@@ -34,12 +36,14 @@ public class CameraFragment : BaseFragment() {
         return binder?.root ?: super.onCreateView(inflater, container, savedInstanceState)
     }
 
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     override suspend fun onSetObservers(scope : CoroutineScope) {
         startCamera()
         binder?.buttonShutterCapture?.setOnTouchListener(this@CameraFragment)
         binder?.buttonLensFlip?.setOnTouchListener(this@CameraFragment)
     }
 
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     override fun onTouchFragment(view : View, event : MotionEvent) : Boolean {
         return if(isActionUp && isInsideBounds(view) && view == binder?.buttonShutterCapture) {
             binder?.buttonShutterCapture?.setOnTouchListener(null)
@@ -54,6 +58,7 @@ public class CameraFragment : BaseFragment() {
         } else super.onTouchFragment(view, event)
     }
 
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     private fun startCamera() { Coroutines.main(this@CameraFragment, {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(requireContext())
         binder?.getViewModel()?.cameraProvider = cameraProviderFuture.get()
@@ -75,6 +80,7 @@ public class CameraFragment : BaseFragment() {
         }, ContextCompat.getMainExecutor( requireContext()) )
     } ) }
 
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     private fun takePicture() { Coroutines.main(this@CameraFragment, {
         binder?.getViewModel()?.imageCapture?.takePicture (
             binder?.getViewModel()?.getOutputFileOptions(null)!!,
@@ -87,10 +93,11 @@ public class CameraFragment : BaseFragment() {
                 override fun onError(exc : ImageCaptureException) {
                     logError(TAG, "Photo capture failed: ${exc.message}", exc)
                     binder?.buttonShutterCapture?.setOnTouchListener(this@CameraFragment)
-            }
+                }
         })
     } ) }
 
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     override fun onDestroy() {
         binder?.getViewModel()?.cameraProvider?.unbindAll()
         super.onDestroy()

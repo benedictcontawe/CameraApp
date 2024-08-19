@@ -165,7 +165,7 @@ public class CameraViewModel : BaseAndroidViewModel {
     public fun getRecordingListener() : Consumer<VideoRecordEvent> {
         return object : Consumer<VideoRecordEvent> {
             @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
-            override fun accept(event : VideoRecordEvent?) {
+            override fun accept(event : VideoRecordEvent) {
                 if (event is VideoRecordEvent.Start) {
                     logDebug(TAG, "Video Record Event Start")
                 } else if (event is VideoRecordEvent.Finalize) {
